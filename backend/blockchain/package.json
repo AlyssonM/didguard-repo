@@ -1,0 +1,17 @@
+{
+  "name": "didguard-repo-blockchain-greeter",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Exemplo de modulo blockchain com Hardhat e contrato Greeter",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "node": "npx hardhat node --port 8545",
+    "deploy:localhost": "npx hardhat ignition deploy ignition/modules/Greeter.js --network localhost"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ignition": "^0.15.5",
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.22.19"
+  }
+}
