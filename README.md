@@ -78,6 +78,5 @@ A trilha principal está em:
 - `specs/camadas/workstation/topicos/05-guia-instalacao-e-configuracao.md`
 
 ## Próximos passos sugeridos
-1. Implementar frontend inicial em `frontend/`.
-2. Integrar `backend/relayer` com `backend/blockchain`.
-3. Evoluir contrato `Greeter` para casos de uso de controle de acesso.
+1. Integrar `backend/relayer` com `backend/blockchain`.
+2. Evoluir contrato `Greeter` para casos o contrato de uso de controle de acesso.
