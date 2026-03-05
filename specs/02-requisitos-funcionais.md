@@ -22,12 +22,13 @@ Após provisionamento bem sucedido, o ESP32 deve solicitar encerramento da janel
 - Aceite: `POST /api/provisioning/finish` retorna `active=false`.
 
 ### RF-004 - Registro de DID Document no IPFS
-O relayer deve publicar DID Document no IPFS e obter CID.
-- Aceite: resposta de upload contem `cid` valido.
+O relayer deve publicar DID Document no contrato (ou IPFS e obter CID a ser registrado no contrato).
+- Aceite: resposta de upload contem `didDocument` válido (opcionalmente `cid` válido).
 
 ### RF-005 - Registro on-chain de DID
-O relayer deve registrar CID e prova no contrato por `registerTagDID`.
-- Aceite: `GET /api/getDidCid?tagDid=...` retorna CID não vazio.
+O relayer deve registrar prova no contrato por `registerTagDID` (e CID opcionalmente).
+- Aceite: `POST /api/registerTagDID` retorna tx hash e leitura posterior indica DID registrado.
+- Aceite (opcional, se IPFS): `GET /api/getDidCid?tagDid=...` retorna CID não vazio.
 
 ### RF-006 - Registro de credencial de TAG
 O sistema deve registrar credencial (`uid`, `issued`, `expiration`, `tagType`) no contrato.
@@ -45,11 +46,11 @@ Administrador deve revogar TAG associada ao usuário.
 ESP32 deve validar challenge, enviar proof e confirmar commit de sessão.
 - Aceite: eventos `authorized`/`denied` sao gerados em `/api/security/events`.
 
-### RF-010 - Controle de acesso por biometria
+### RF-010 - Controle de acesso por biometria (opcional)
 Sistema deve recuperar DID/UID por embedding facial e consultar contrato para autorização.
 - Aceite: `POST /api/security/biometricAccessCheck` retorna `allowed` + `tagDid` + `tagUid`.
 
-### RF-011 - Login biométrico
+### RF-011 - Login biométrico (opcional)
 Frontend deve permitir login por biometria consultando relayer.
 - Aceite: rota de login retorna DID associado quando embedding e reconhecido.
 
@@ -64,10 +65,6 @@ Frontend deve consultar usuários por DID/nome/registro.
 ### RF-014 - Timeline de segurança
 Dashboard deve exibir eventos enriquecidos com usuário/dispositivo.
 - Aceite: `GET /api/security/events` retorna lista com campos de contexto.
-
-### RF-015 - Resync de estado local para contrato
-Sistema deve reconstituir estado on-chain a partir de `.data` após recreate.
-- Aceite: `npm run resync:data` conclui e consultas de CID/credencial/acesso batem.
 
 ## 4. Bibliografia
 - IEEE 29148 (requisitos).

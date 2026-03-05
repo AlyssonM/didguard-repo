@@ -13,7 +13,7 @@ Trilha de estudos para que o aluno compreenda os fundamentos teoricos e consiga 
   - DID Core (W3C)
   - arquitetura em camadas (C4)
 - Resultado esperado:
-  - explicar o papel de DID, CID e relayer no projeto.
+  - explicar o papel de DID, CID (IPFS) e relayer no projeto.
 
 ### Ciclo 2 - Criptografia aplicada ao firmware
 - Estudar:
@@ -21,7 +21,7 @@ Trilha de estudos para que o aluno compreenda os fundamentos teoricos e consiga 
   - ECDSA secp256k1 (conceitos)
   - anti-replay por nonce/counter
 - Resultado esperado:
-  - interpretar `compute_tag_counter_mac` e `compute_tag_challenge_proof`.
+  - interpretar códigos e funções que realizem estas operações.
 
 ### Ciclo 3 - Smart contracts e integração
 - Estudar:
@@ -29,7 +29,7 @@ Trilha de estudos para que o aluno compreenda os fundamentos teoricos e consiga 
   - eventos e controle de acesso
   - Hardhat deploy e testes
 - Resultado esperado:
-  - explicar `hasAccessDebug` e fluxo `setAccess/revoke`.
+  - explicar funções do contrato e fluxo `set` e `revoke` de permissões.
 
 ### Ciclo 4 - Operação distribuida e reprodução
 - Estudar:
@@ -37,7 +37,7 @@ Trilha de estudos para que o aluno compreenda os fundamentos teoricos e consiga 
   - Docker Compose e recuperação de estado
   - observabilidade via eventos
 - Resultado esperado:
-  - executar recreate + resync sem perda funcional.
+  - Compreender como funciona o IPFS e como ele é usado no projeto.
 
 ## 4. Bibliografia principal
 - W3C DID Core: https://www.w3.org/TR/did-core/

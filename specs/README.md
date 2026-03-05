@@ -14,6 +14,7 @@ Esta pasta consolida a especificação técnica e o plano de trabalho do DIDGuar
 3. Estudar `04-arquitetura-e-camadas.md` e `05-interfaces-e-contratos.md`.
 4. Executar `06-plano-de-execucao.md`.
 5. Validar resultados com `08-matriz-rastreabilidade.md`.
+6. Consultar `glossario.md` para padronizar termos técnicos.
 
 ## 4. Estrutura
 - `00-metodologia-de-trabalho.md`
@@ -26,15 +27,15 @@ Esta pasta consolida a especificação técnica e o plano de trabalho do DIDGuar
 - `07-plano-de-estudos-e-pesquisa.md`
 - `08-matriz-rastreabilidade.md`
 - `09-plano-didatico.md`
+- `glossario.md`
 - `camadas/*.md`
 
 ## 5. Fontes de referência do projeto
 - Implementação por camadas em:
-  - `ESP32Device.pio/`
+  - `esp32-firmware/`
   - `RelayerNode/`
   - `Blockchain/`
   - `Frontend/`
-
 
 
 

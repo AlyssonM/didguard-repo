@@ -32,18 +32,12 @@ Stack deve operar via Docker Compose com reinicio de servicos.
 Relayer deve manter separacao por rotas/contexto para manutencao.
 - Evidencia: `RelayerNode/src/routes/*.js` e `src/context.js`.
 
-### RNF-007 - Reprodutibilidade didática
-Build e execução devem ser reproduzíveis em laboratório com instruções claras.
-- Evidencia: `specs/06-plano-de-execucao.md` e registros de execução em laboratório.
-
-### RNF-008 - Usabilidade operacional
+### RNF-007 - Usabilidade operacional
 Dashboard deve permitir tarefas administrativas sem uso de scripts manuais para operação básica.
 - Evidencia: concessão/revogação, timeline e biometria no frontend.
 
 ## 4. Metricas sugeridas para aula
 - Tempo médio de provisionamento por TAG.
-- Taxa de sucesso no challenge-response.
-- Tempo médio para recuperar ambiente após recreate (com resync).
 
 ## 5. Bibliografia
 - ISO/IEC 25010 (qualidade de software).

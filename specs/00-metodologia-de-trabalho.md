@@ -13,14 +13,14 @@ Documento que define a forma de uso e evolucao da pasta `specs/` como plano ofic
 2. Especificação:
    - registrar requisitos funcionais e não funcionais.
 3. Implementação:
-   - desenvolver por camada (firmware, relayer, blockchain, ipfs, frontend).
+   - desenvolver por camada (firmware, relayer, blockchain, frontend).
 4. Verificação:
    - executar testes técnicos e validar evidências.
 5. Rastreabilidade:
    - manter matriz requisito -> artefato -> validação.
 
 ## 4. Premissas
-- Ambiente alvo: desenvolvimento local com Docker + Hardhat + IPFS Kubo.
+- Ambiente alvo: desenvolvimento local com Docker + Hardhat.
 - Relayer como componente de integração entre camadas.
 - Frontend e firmware consumindo API HTTP do relayer.
 

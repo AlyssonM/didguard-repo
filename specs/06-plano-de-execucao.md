@@ -4,7 +4,7 @@
 Roteiro de execução do DIDGuard do zero, em ambiente local.
 
 ## 2. Objetivo
-- Permitir que alunos executem a stack completa com validação objetiva.
+- Permitir que os alunos executem a stack completa com validação objetiva.
 - Garantir padronização mínima de workstation antes dos fluxos funcionais.
 
 ## 3. Pre-requisitos
@@ -13,23 +13,19 @@ Roteiro de execução do DIDGuard do zero, em ambiente local.
 - Python
 - Antigravity (ou IDE compatível com instalação por VSIX)
 - ESP32 + RC522 + TAG NFC
-- Câmera para biometria (frontend)
+- Câmera para biometria opcional (frontend)
 
 ## 4. Fase 0 - Setup da workstation
 1. Instalar Antigravity usando o instalador oficial disponibilizado pela disciplina.
-2. Instalar extensões locais disponíveis no repositório:
-   - `extensions/openai.chatgpt-0.4.71-win32-x64.vsix`
+2. Instalar a extensão local disponível no repositório:
    - `extensions/platformio.platformio-ide-3.3.4-win32-x64.vsix`
-3. (Opcional via CLI) instalar VSIX com comando:
-   - `code --install-extension .\extensions\openai.chatgpt-0.4.71-win32-x64.vsix`
-   - `code --install-extension .\extensions\platformio.platformio-ide-3.3.4-win32-x64.vsix`
-4. Validar ferramentas base:
+3. Validar ferramentas base:
    - `git --version`
    - `docker --version`
    - `node --version`
    - `python --version`
 
-## 5. Fase A - Subir infraestrutura
+## 5. Fase A - Subir infraestrutura (Quando minimamente funcional)
 1. Raiz do projeto:
    - `docker compose up -d --build`
 2. Validar containers:
@@ -37,14 +33,14 @@ Roteiro de execução do DIDGuard do zero, em ambiente local.
 3. Validar relayer:
    - `Invoke-RestMethod "http://localhost:3000/api/time"`
 
-## 6. Fase B - Frontend
+## 6. Fase B - Frontend (Quando minimamente funcional)
 1. `cd Frontend`
 2. `bun install`
 3. `bun run dev`
 4. Abrir `http://localhost:3001`
 
-## 7. Fase C - Firmware
-1. Abrir `ESP32Device.pio` no Antigravity.
+## 7. Fase C - Firmware (Quando minimamente funcional)
+1. Abrir `esp32-firmware` no Antigravity.
 2. Usar a extensão PlatformIO (instalada por VSIX) para `Build` e `Upload`.
 3. Abrir monitor serial pela própria extensão (baud `115200`).
 4. Confirmar:
@@ -72,22 +68,13 @@ Roteiro de execução do DIDGuard do zero, em ambiente local.
 2. Repetir tentativa por TAG e biometria.
 3. Resultado esperado: acesso negado.
 
-## 11. Fase G - Recreate + resync
-1. Recriar stack.
-2. Executar:
-   - `docker exec didguard-relayernode npm run resync:data`
-3. Validar restauração:
-   - CID por DID
-   - credenciais
-   - acesso esperado
-
-## 12. Evidências mínimas de execução
+## 11. Evidências mínimas de execução
 - Captura de logs do ESP32.
 - Respostas de API principais.
 - Hashes de transação retornados em `setAccess/revoke`.
 - Timeline com eventos coerentes.
 
-## 13. Bibliografia
+## 12. Bibliografia
 - Docker Compose docs.
 - PlatformIO docs.
 - Hardhat local network docs.

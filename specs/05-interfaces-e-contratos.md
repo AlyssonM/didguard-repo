@@ -43,12 +43,12 @@ Especifica interfaces entre camadas: API HTTP do relayer, funções do contrato 
 - `addTagCredential(bytes32,bytes32,string,uint256,string)`
 - `revokeTagCredential(bytes32,bytes32)`
 - `setAccess(bytes32,bytes32,bytes32,bool,uint256)`
-- `hasAccessDebug(bytes32,bytes32,bytes32)`
+- `hasAccess(bytes32,bytes32,bytes32)`
 - `getTagCredentials(bytes32)`
 - `getProofInfo(bytes32)`
 - `getCidFromDID(bytes32)`
 
-## 5. Layout funcional da TAG (MIFARE)
+## 5. Layout funcional da TAG (MIFARE classic)
 - `BLOCK_DID = 1`
 - `BLOCK_TIME = 2`
 - `BLOCK_MAC = 4`
@@ -62,6 +62,7 @@ Especifica interfaces entre camadas: API HTTP do relayer, funções do contrato 
 
 ## 7. Bibliografia
 - OpenAPI Specification.
+- FastAPI Docs.
 - Ethereum ABI Specification.
 - ISO/IEC 14443 e MIFARE Classic docs.
 
