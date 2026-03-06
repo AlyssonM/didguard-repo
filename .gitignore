@@ -61,3 +61,16 @@ node_modules/
 # Backup
 backup/
 *_backup_*
+
+# latex temp/build files
+*.fdb_latexmk
+*.aux
+*.blg
+*.bbl
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.log
+*.synctex.gz
