@@ -8,7 +8,7 @@ Padronizar os termos técnicos usados nas especificações, implementação e va
 - DID Document: documento JSON associado a um DID, com metadados e métodos de verificação.
 - Verifiable Credential (VC): credencial verificável assinada criptograficamente.
 - Verifiable Presentation (VP): apresentação de uma ou mais credenciais para verificação.
-- KYC (Know Your Customer): conjunto de dados de identificação do usuário (nome, matrícula/SIAPE, tipo).
+- KYC (Know Your Customer): conjunto de dados de identificação do usuário (nome, matrícula/SIAPE, etc.).
 - Tag DID: DID associado a uma TAG NFC no projeto.
 
 ## 3. Termos de criptografia e segurança

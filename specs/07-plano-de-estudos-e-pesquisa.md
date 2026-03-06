@@ -11,6 +11,7 @@ Trilha de estudos para que o aluno compreenda os fundamentos teoricos e consiga 
 ### Ciclo 1 - Fundamentos de identidade e arquitetura
 - Estudar:
   - DID Core (W3C)
+  - RFID MIFARE Classic
   - arquitetura em camadas (C4)
 - Resultado esperado:
   - explicar o papel de DID, CID (IPFS) e relayer no projeto.
