@@ -1,0 +1,67 @@
+﻿\documentclass[12pt,openany]{book}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{lmodern}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{csquotes}
+\usepackage{verbatim}
+\usepackage{hyperref}
+\usepackage{natbib}
+
+\geometry{a4paper, margin=2.5cm}
+\onehalfspacing
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  urlcolor=blue,
+  citecolor=blue,
+  pdftitle={Estudos Fundamentais do DIDGuard},
+  pdfauthor={Alysson Machado}
+}
+
+\title{Estudos Fundamentais do DIDGuard \\\large Apostila técnica por áreas de estudo}
+\author{Alysson Machado}
+\date{2026}
+
+\begin{document}
+
+\frontmatter
+\maketitle
+
+\chapter*{Apresentação}
+Esta apostila organiza os fundamentos técnicos necessários para compreender e construir soluções alinhadas ao DIDGuard.
+Cada capítulo cobre conceitos, terminologia, referências e modelos de implementação, com foco em estudo dirigido e base conceitual sólida.
+
+O percurso foi desenhado para que cada capítulo prepare o terreno para o seguinte:
+\begin{description}[leftmargin=1.2cm, labelwidth=1cm, labelsep=0.2cm]
+  \item[Cap.~1] apresenta \textbf{Identificadores Descentralizados (DIDs)} --- o alicerce de identidade do sistema;
+  \item[Cap.~2] explora \textbf{Tags RFID e MIFARE Classic} --- a camada física que transporta credenciais;
+  \item[Cap.~3] introduz \textbf{Criptografia Aplicada} --- as primitivas que protegem dados e identidades;
+  \item[Cap.~4] aborda \textbf{Blockchain e Contratos Inteligentes} --- o registro verificável de permissões.
+\end{description}
+
+Todos os capítulos incluem uma seção ``Rodando na prática'' com laboratórios autocontidos no diretório \texttt{examples/}, permitindo que o leitor experimente cada conceito antes de avançar.
+
+\tableofcontents
+\include{chapters/lista-de-siglas}
+
+\mainmatter
+\include{chapters/ch01-dids}
+\include{chapters/ch02-rfid-mifare}
+\include{chapters/ch03-criptografia-aplicada}
+\include{chapters/ch04-blockchain-contratos}
+
+\backmatter
+\include{chapters/glossario-cap1}
+\include{chapters/glossario-cap2}
+\include{chapters/glossario-cap3}
+\include{chapters/glossario-cap4}
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,60 @@
+\chapter*{Glossário}
+\addcontentsline{toc}{chapter}{Glossário}
+
+\begin{description}[
+  font=\normalfont\bfseries,
+  style=multiline,
+  leftmargin=5.8cm,
+  labelwidth=5.1cm,
+  labelsep=0.35cm,
+  itemsep=0.55\baselineskip
+]
+  \item[Anticolisão] Procedimento que permite ao leitor identificar e selecionar uma tag específica quando várias estão presentes no mesmo campo.
+  \item[Assertion Method] Propriedade de um DID Document que indica quais métodos podem ser usados para assinar afirmações, como credenciais ou declarações verificáveis.
+  \item[Assinatura digital] Evidência criptográfica produzida com chave privada e verificável com a chave pública correspondente.
+  \item[Authentication] Propriedade de um DID Document que indica quais métodos podem ser usados para autenticar o sujeito.
+  \item[Autenticação mútua] Processo em que leitor e tag, ou cliente e serviço, validam um ao outro antes de liberar acesso a dados ou operações.
+  \item[Autenticidade] Propriedade que fornece evidências de autoria ou origem confiável de uma mensagem, operação ou evidência digital.
+  \item[Bits de acesso] Conjunto de bits e seus complementos que define permissões de leitura, escrita e operações especiais em setores da MIFARE Classic.
+  \item[Bloco] Unidade básica de armazenamento na MIFARE Classic, com 16 bytes.
+  \item[Bloco de fabricante] Primeiro bloco do setor 0 na MIFARE Classic, reservado para dados de fabricação e identificação da tag.
+  \item[Bloco de valor] Formato especial de bloco usado para contadores, créditos e débitos, com redundância interna para detecção de erro.
+  \item[Blockchain] Estrutura de livro-razão distribuído em que blocos de transações são encadeados por referências criptográficas e validados segundo regras de consenso.
+  \item[Chave privada] Chave secreta de um par assimétrico, usada para assinar ou decifrar conforme o protocolo adotado.
+  \item[Chave pública] Chave distribuível de um par assimétrico, usada para verificação de assinaturas ou cifragem em cenários específicos.
+  \item[Cifra autenticada] Construção criptográfica que combina confidencialidade e verificação de integridade/autenticidade, como AES-GCM.
+  \item[Confidencialidade] Propriedade que restringe a leitura do conteúdo apenas a entidades autorizadas.
+  \item[Consenso] Conjunto de regras e mecanismos pelos quais uma rede distribuída concorda sobre a ordem e a validade das alterações de estado.
+  \item[Contador monotônico] Valor que apenas cresce ao longo do tempo de uso de um protocolo, útil para evitar reutilização de estados antigos.
+  \item[Contrato inteligente] Programa implantado em uma blockchain, executado segundo regras determinísticas da plataforma.
+  \item[Controller] Entidade que controla um DID ou um método de verificação associado a ele.
+  \item[Criptografia assimétrica] Modelo criptográfico baseado em pares de chaves pública e privada.
+  \item[Criptografia simétrica] Modelo criptográfico em que a mesma chave, ou chaves diretamente relacionadas, é usada para cifrar e decifrar.
+  \item[CRYPTO1] Cifra proprietária usada pela MIFARE Classic para autenticação e proteção das transações no nível do cartão.
+  \item[Dereferenciamento] Processo de obter um recurso específico associado a um DID, como uma chave indicada por fragmento ou um serviço declarado.
+  \item[DID Document] Documento estruturado que descreve os metadados associados a um DID, incluindo chaves, métodos de autenticação e serviços.
+  \item[Driver do método] Implementação específica das regras de resolução de um determinado método DID.
+  \item[Estado on-chain] Conjunto de dados atualmente mantido e validado pela blockchain como estado oficial do protocolo.
+  \item[EVM] Máquina virtual da plataforma Ethereum responsável por executar o bytecode dos contratos de forma determinística.
+  \item[Evento] Registro emitido por um contrato inteligente para sinalizar uma ocorrência relevante a observadores externos.
+  \item[Fonte de verdade] Infraestrutura onde o estado de um DID está efetivamente registrado, como um servidor web, blockchain ou registro distribuído.
+  \item[Função hash criptográfica] Função unidirecional que transforma dados de tamanho arbitrário em um resumo de tamanho fixo, usada para integridade, indexação e construção de outros mecanismos.
+  \item[Gas] Unidade abstrata de custo computacional usada para medir e cobrar execução e armazenamento em plataformas como Ethereum.
+  \item[Integridade] Propriedade que permite detectar alteração não autorizada em dados ou mensagens.
+  \item[Key A] Chave de autenticação armazenada no setor trailer da MIFARE Classic, usada conforme a política de acesso configurada.
+  \item[Key Agreement] Propriedade de um DID Document que indica métodos aptos a estabelecer segredos compartilhados para comunicação segura.
+  \item[Key B] Segunda chave de autenticação possível no setor trailer da MIFARE Classic, também dependente das condições de acesso do setor.
+  \item[Método DID] Conjunto de regras que define como um DID é criado, resolvido, atualizado e, quando aplicável, desativado.
+  \item[Não repúdio] Propriedade que dificulta que o autor de uma assinatura válida negue ter produzido determinada evidência.
+  \item[Nó] Instância participante de uma rede distribuída que valida, propaga, consulta ou armazena o estado compartilhado.
+  \item[Nonce] Valor usado uma única vez em um protocolo, normalmente para distinguir execuções e mitigar replay.
+  \item[Replay] Reutilização indevida de uma mensagem antiga válida para tentar obter vantagem ou acesso não autorizado.
+  \item[Resolver] Componente que interpreta o método DID e coordena a obtenção do DID Document.
+  \item[Resolução de DID] Processo de obter o DID Document e os metadados associados a partir de um DID.
+  \item[Service] Entrada do DID Document usada para anunciar endpoints ou recursos associados à identidade.
+  \item[Service Endpoint] Endereço do serviço associado a uma entrada de serviço em um DID Document.
+  \item[Setor] Agrupamento lógico de blocos dentro da memória de uma MIFARE Classic, usado para organizar dados e permissões.
+  \item[Setor trailer] Último bloco de cada setor da MIFARE Classic, reservado para chaves e bits de acesso.
+  \item[Transação] Operação submetida a uma blockchain para transferir valor, invocar código ou alterar estado.
+  \item[Verification Method] Mecanismo criptográfico declarado em um DID Document para verificação de assinaturas, autenticação ou outros usos.
+\end{description}

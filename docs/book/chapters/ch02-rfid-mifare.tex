@@ -1,0 +1,292 @@
+\chapter{Tags RFID e MIFARE Classic}
+\label{chap:rfid-mifare}
+
+\section{Objetivos de aprendizagem}
+Ao final deste capítulo, o aluno deve ser capaz de:
+\begin{itemize}[leftmargin=*]
+  \item explicar o funcionamento básico de sistemas de \textit{Radio Frequency Identification} (RFID) em 13,56 MHz;
+  \item distinguir os papéis do leitor e da tag em uma arquitetura com MIFARE Classic;
+  \item interpretar a organização em setores, blocos e setor trailer de uma MIFARE Classic;
+  \item identificar registradores essenciais do leitor MFRC522 e sua função no fluxo de leitura e escrita;
+  \item justificar por que uma aplicação moderna costuma adicionar uma camada criptográfica própria sobre a tag.
+\end{itemize}
+\section{Visão geral}
+RFID é uma tecnologia de identificação por radiofrequência que permite trocar dados entre um leitor e uma credencial sem contato físico direto. No contexto deste capítulo, o foco está na faixa de alta frequência (HF), operando em 13,56 MHz, bastante comum em cartões de acesso, bilhetagem, laboratórios e kits educacionais \citep{finkenzeller_rfid,nxp_mifare_classic_ev1}.
+
+Dentro desse ecossistema, a família MIFARE Classic é uma das mais conhecidas em ambientes didáticos. Ela combina baixo custo, grande disponibilidade de módulos e uma organização de memória simples o suficiente para estudo de autenticação, leitura, escrita e controle de acesso. Ao mesmo tempo, suas limitações de segurança são bem documentadas na literatura, o que a torna um bom objeto de estudo para discutir por que sistemas reais precisam de reforços adicionais na camada de aplicação \citep{garcia_dismantling_mifare,gans_practical_attack_mifare}.
+
+\section{Componentes do hardware}
+Em uma arquitetura típica com MIFARE Classic, há pelo menos quatro elementos:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Leitor}: o \textit{Proximity Coupling Device} (PCD), responsável por energizar a tag, iniciar a comunicação e executar comandos de leitura, escrita e autenticação.
+  \item \textbf{Tag ou cartão}: o \textit{Proximity Integrated Circuit Card} (PICC), que responde ao leitor usando o campo eletromagnético recebido.
+  \item \textbf{Controlador hospedeiro}: um microcontrolador ou computador que configura o leitor, interpreta respostas e integra o fluxo com a aplicação.
+  \item \textbf{Antena e estágio de radiofrequência}: circuito que gera o campo em 13,56 MHz e sustenta o acoplamento entre leitor e tag.
+\end{itemize}
+
+Em laboratório, é comum usar o circuito leitor MFRC522, controlado por um microcontrolador via barramento \textit{Serial Peripheral Interface} (SPI). Em módulos didáticos, os sinais mais frequentes são:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{SCK} (\textit{serial clock}), \texttt{MOSI} (\textit{master out, slave in}) e \texttt{MISO} (\textit{master in, slave out}) para o barramento SPI;
+  \item \texttt{SDA}, rótulo adotado por alguns módulos para a linha de seleção do periférico, ou \texttt{NSS} (\textit{slave select});
+  \item \texttt{RST} (\textit{reset}) para reinicialização do leitor;
+  \item linha de \textit{Interrupt Request} (IRQ) opcional para sinalização de eventos assíncronos.
+\end{itemize}
+
+O MFRC522 é o circuito de front-end que cuida da parte de radiofrequência, temporização, fila interna de dados e comandos do protocolo ISO/IEC 14443 A, enquanto o microcontrolador hospedeiro fica responsável pela lógica da aplicação \citep{nxp_mfrc522}.
+
+\section{Fluxo básico de comunicação}
+O fluxo mínimo entre leitor e tag pode ser descrito em etapas:
+\begin{enumerate}[leftmargin=*]
+  \item o leitor ativa o campo de radiofrequência e entra em estado de busca;
+  \item a tag no campo responde a uma requisição inicial;
+  \item o leitor executa o procedimento de anticolisão para descobrir e selecionar uma tag específica;
+  \item a partir do \textit{Unique Identifier} (UID) da tag selecionada, o sistema decide o que fazer em seguida;
+  \item para acessar setores protegidos, o leitor executa autenticação com \texttt{Key A} ou \texttt{Key B};
+  \item somente depois da autenticação o leitor pode ler, escrever ou executar operações especiais sobre os blocos permitidos.
+\end{enumerate}
+
+Esse ponto é importante: o UID ajuda a selecionar a tag, mas não deve ser tratado, sozinho, como prova suficiente de identidade ou autorização. Em especial, aplicações de controle de acesso que confiam apenas no UID tendem a ser frágeis.
+
+\section{Organização da memória na MIFARE Classic}
+As tags MIFARE Classic armazenam dados em memória não volátil do tipo \textit{Electrically Erasable Programmable Read-Only Memory} (EEPROM). A unidade básica é o bloco de 16 bytes. Esses blocos são agrupados em setores \citep{nxp_mifare_classic_ev1}.
+
+\subsection{MIFARE Classic 1K}
+Na variante 1K, com aproximadamente 1 kilobyte de capacidade nominal, a organização mais comum é:
+\begin{itemize}[leftmargin=*]
+  \item 16 setores;
+  \item 4 blocos por setor;
+  \item 16 bytes por bloco;
+  \item total nominal de 1024 bytes.
+\end{itemize}
+
+O arranjo de um setor típico é:
+\begin{verbatim}
+Bloco 0   Dados ou, no setor 0, bloco de fabricante
+Bloco 1   Dados
+Bloco 2   Dados
+Bloco 3   Setor trailer
+\end{verbatim}
+
+No setor 0, bloco 0, fica o bloco de fabricante. Ele contém informações gravadas de fábrica, incluindo o UID ou um identificador compatível, e não deve ser tratado como área comum de dados da aplicação.
+
+\subsection{MIFARE Classic 4K}
+Na variante 4K, com aproximadamente 4 kilobytes de capacidade nominal, a organização é híbrida:
+\begin{itemize}[leftmargin=*]
+  \item setores 0 a 31 com 4 blocos por setor;
+  \item setores 32 a 39 com 16 blocos por setor;
+  \item 16 bytes por bloco em toda a memória.
+\end{itemize}
+
+Essa diferença é relevante porque a lógica de endereçamento, autenticação e mapeamento de blocos precisa considerar o tamanho do setor.
+
+\section{Setor trailer e bits de acesso}
+O último bloco de cada setor é chamado de setor trailer. Ele concentra o material de controle de acesso do setor e costuma ser a área mais sensível do ponto de vista de configuração.
+
+Sua estrutura típica é:
+\begin{verbatim}
+Bytes 0..5    Key A
+Bytes 6..8    Bits de acesso e seus complementos
+Byte  9       General Purpose Byte
+Bytes 10..15  Key B
+\end{verbatim}
+
+Os bits de acesso definem quem pode:
+\begin{itemize}[leftmargin=*]
+  \item ler ou escrever blocos de dados;
+  \item usar \texttt{Key A} ou \texttt{Key B} para autenticação;
+  \item ler ou modificar partes do próprio trailer;
+  \item executar operações especiais, como atualização de blocos de valor.
+\end{itemize}
+
+Há duas observações práticas importantes:
+\begin{itemize}[leftmargin=*]
+  \item a codificação dos bits de acesso usa redundância e complementos, então erros de configuração podem tornar o setor inacessível;
+  \item a escolha de \texttt{Key A} e \texttt{Key B} não substitui uma política de aplicação: ela controla o acesso ao setor, mas não representa, sozinha, uma identidade forte de usuário.
+\end{itemize}
+
+\section{Blocos de valor}
+Além de blocos comuns de dados, a MIFARE Classic admite o formato de bloco de valor, pensado para armazenar contadores, créditos e débitos. Esse formato usa redundância interna para detectar erros simples de integridade:
+\begin{verbatim}
+Bytes 0..3    Valor
+Bytes 4..7    Complemento do valor
+Bytes 8..11   Repetição do valor
+Bytes 12..15  Endereço do bloco e seus complementos
+\end{verbatim}
+
+Esse desenho permite operações como incremento, decremento, restauração e transferência. Ainda assim, ele não resolve problemas maiores de autenticação forte, rastreabilidade ou vínculo com regras de negócio externas.
+
+\section{Comandos básicos no nível da tag}
+Sem entrar em detalhes operacionais de baixo nível, o conjunto mínimo de operações estudado em laboratório costuma incluir:
+\begin{itemize}[leftmargin=*]
+  \item requisição e ativação da tag;
+  \item anticolisão e seleção;
+  \item autenticação com \texttt{Key A} ou \texttt{Key B};
+  \item leitura de bloco;
+  \item escrita de bloco;
+  \item operações sobre bloco de valor.
+\end{itemize}
+
+Do ponto de vista do projeto de sistemas, essas operações bastam para mostrar que a tag oferece armazenamento e controle básico de acesso por setor, mas não entrega, por si só, semântica rica de autorização.
+
+\section{Registradores relevantes do MFRC522}
+No leitor MFRC522, o microcontrolador hospedeiro controla o fluxo por meio de registradores. Eles pertencem ao leitor, não à tag. Em outras palavras, não devem ser confundidos com os blocos de memória da MIFARE Classic \citep{nxp_mfrc522}.
+
+\begin{center}
+\small
+\begin{tabular}{|p{3.0cm}|p{2.0cm}|p{8.3cm}|}
+\hline
+\textbf{Registrador} & \textbf{Endereço} & \textbf{Papel básico} \\
+\hline
+\texttt{CommandReg} & \texttt{0x01} & Seleciona o comando interno do leitor, como ocioso, transmissão, recepção, autenticação ou cálculo de CRC. \\
+\hline
+\texttt{ComIrqReg} & \texttt{0x04} & Indica eventos concluídos, temporização, recepção ou transmissão e ajuda a sincronizar o firmware com o estado do leitor. \\
+\hline
+\texttt{ErrorReg} & \texttt{0x06} & Reporta condições de erro, como colisão, paridade, buffer ou protocolo. \\
+\hline
+\texttt{Status1Reg} & \texttt{0x07} & Expõe estados internos úteis para acompanhar a máquina de estados do leitor. \\
+\hline
+\texttt{FIFODataReg} & \texttt{0x09} & Guarda os bytes enviados ao leitor e os bytes recebidos da tag na fila \textit{First In, First Out} (FIFO). \\
+\hline
+\texttt{FIFOLevelReg} & \texttt{0x0A} & Informa quantos bytes estão presentes na FIFO e permite zerar a fila quando necessário. \\
+\hline
+\texttt{BitFramingReg} & \texttt{0x0D} & Controla alinhamento de bits, número de bits válidos do último byte e início de transmissão. \\
+\hline
+\texttt{ModeReg} & \texttt{0x11} & Configura aspectos globais do modo de operação, incluindo comportamento do cálculo de \textit{Cyclic Redundancy Check} (CRC). \\
+\hline
+\texttt{TxModeReg} e \texttt{RxModeReg} & \texttt{0x12} e \texttt{0x13} & Ajustam parâmetros de transmissão e recepção do protocolo. \\
+\hline
+\texttt{TxControlReg} & \texttt{0x14} & Liga ou desliga a antena e controla o estágio transmissor. \\
+\hline
+\texttt{CRCResultRegH/L} & \texttt{0x21} e \texttt{0x22} & Disponibilizam o resultado do cálculo de CRC realizado pelo próprio leitor. \\
+\hline
+\texttt{VersionReg} & \texttt{0x37} & Informa a versão do circuito, útil em diagnóstico e compatibilidade. \\
+\hline
+\end{tabular}
+\end{center}
+
+Na prática, uma biblioteca de driver esconde boa parte desse detalhe. Mesmo assim, conhecer esses registradores ajuda o aluno a entender como o firmware controla a sequência de autenticação, leitura, escrita e tratamento de falhas.
+
+\section{Exemplo de mapeamento de aplicação}
+Uma aplicação pode reservar blocos específicos para seus próprios dados. Um desenho didático possível é:
+\begin{verbatim}
+Bloco 1   Identificador da aplicação
+Bloco 2   Timestamp ou versão
+Bloco 4   Código de autenticação de mensagem (MAC) ou resumo de integridade
+Bloco 13  Material de verificação adicional
+Bloco 14  Estado de segurança, como contador e MAC do contador
+Blocos 16+ Assinaturas ou chaves públicas derivadas
+\end{verbatim}
+
+Esse tipo de mapeamento já mostra uma ideia importante: a tag deixa de ser apenas um repositório de bytes arbitrários e passa a participar de um protocolo maior, desenhado pela aplicação.
+
+\section{Limitações de segurança da MIFARE Classic}
+Do ponto de vista histórico, a MIFARE Classic teve grande adoção prática. Do ponto de vista de segurança moderna, porém, ela não deve ser tratada como única raiz de confiança. Entre as limitações mais relevantes estão:
+\begin{itemize}[leftmargin=*]
+  \item uso da cifra proprietária CRYPTO1, hoje amplamente estudada e considerada inadequada para novas arquiteturas que exijam alto nível de proteção;
+  \item dependência frequente de chaves estáticas por setor;
+  \item tendência, em sistemas simplificados, de confiar apenas no UID como identificador de usuário;
+  \item dificuldade de expressar políticas ricas, como validade temporal, vínculo com dispositivo, auditoria e múltiplos fatores.
+\end{itemize}
+
+A literatura técnica mostrou, há bastante tempo, que o modelo de segurança da MIFARE Classic possui fragilidades estruturais. Em consequência, seu uso como credencial única de acesso deve ser evitado em sistemas que demandem maior resistência a clonagem, replay ou engenharia reversa \citep{garcia_dismantling_mifare,gans_practical_attack_mifare}.
+
+\section{Por que reforçar a criptografia no nível da aplicação}
+É exatamente nesse ponto que entra o gancho arquitetural de sistemas como o DIDGuard. Em vez de confiar que a segurança nativa da MIFARE Classic basta, a aplicação adiciona uma camada própria de proteção e validação.
+
+Essa camada pode oferecer:
+\begin{itemize}[leftmargin=*]
+  \item associação da tag a uma identidade lógica mais rica do que o UID;
+  \item mensagens autenticadas com \textit{Hash-based Message Authentication Code} (HMAC) ou assinaturas digitais;
+  \item contadores monotônicos e desafios aleatórios para reduzir replay;
+  \item verificação de autorização fora da tag, em um serviço, contrato ou política central verificável;
+  \item auditoria, revogação e validade temporal das permissões;
+  \item segundo fator, como biometria, em fluxos de risco maior.
+\end{itemize}
+
+Em termos práticos, a MIFARE Classic pode continuar sendo usada como portadora de um identificador e de material auxiliar de autenticação, mas a decisão de acesso passa a depender de um protocolo mais forte no nível da aplicação. Isso evita superestimar a proteção oferecida por uma tecnologia originalmente pensada para cenários mais simples.
+
+\section{MIFARE Classic versus plataformas mais modernas}
+Cartões mais recentes da própria linha MIFARE, como variantes baseadas em \textit{Advanced Encryption Standard} (AES), oferecem mecanismos criptográficos e operacionais mais robustos do que a MIFARE Classic \citep{nxp_mifare_plus_ev2}. Ainda assim, mesmo com uma tag mais forte, continua fazendo sentido manter uma camada de aplicação bem desenhada para:
+\begin{itemize}[leftmargin=*]
+  \item vincular credenciais a regras de negócio;
+  \item separar autenticação da decisão de autorização;
+  \item integrar rastreabilidade, revogação e múltiplos fatores;
+  \item reduzir o impacto de comprometimento de um único componente físico.
+\end{itemize}
+
+\section{Leituras recomendadas}
+\begin{itemize}[leftmargin=*]
+  \item Finkenzeller, para fundamentos gerais de RFID, arquitetura e protocolos \citep{finkenzeller_rfid};
+  \item datasheet da MIFARE Classic EV1, para organização de memória, autenticação e modelo de setores \citep{nxp_mifare_classic_ev1};
+  \item datasheet do MFRC522, para registradores, controle do leitor e integração com microcontroladores \citep{nxp_mfrc522};
+  \item trabalhos de Garcia e de Koning Gans, para discussão acadêmica das limitações de segurança da MIFARE Classic \citep{garcia_dismantling_mifare,gans_practical_attack_mifare};
+  \item documentação da família MIFARE Plus EV2, para contraste com soluções de geração mais recente \citep{nxp_mifare_plus_ev2}.
+\end{itemize}
+
+\section{Rodando na prática}
+O objetivo desta prática é executar um simulador de memória MIFARE Classic para visualizar autenticação, leitura, escrita e setor trailer sem depender de hardware físico.
+
+\subsection{Pré-requisitos}
+\begin{itemize}[leftmargin=*]
+  \item Node.js 18 ou superior;
+  \item terminal com suporte aos comandos do Node;
+  \item diretório \texttt{docs/book/examples/cap2-rfid-mifare} disponível localmente.
+\end{itemize}
+
+\subsection{Arquivos do laboratório}
+O mini projeto deste capítulo contém:
+\begin{verbatim}
+mifare-sim.mjs
+\end{verbatim}
+
+\subsection{Executando}
+No diretório do laboratório:
+\begin{verbatim}
+node mifare-sim.mjs
+\end{verbatim}
+
+\subsection{O que observar}
+Durante a execução, o aluno deve verificar:
+\begin{itemize}[leftmargin=*]
+  \item tentativa de leitura sem autenticação;
+  \item autenticação do setor por meio da chave A;
+  \item escrita de dados em um bloco comum;
+  \item inspeção do setor trailer com chaves e bits de acesso.
+\end{itemize}
+
+\subsection{Perguntas de análise}
+\begin{itemize}[leftmargin=*]
+  \item Por que a leitura falha antes da autenticação, mas o trailer pode ser inspecionado?
+  \item Em que sentido a chave padrão \texttt{FFFFFFFFFFFF} compromete a segurança da tag?
+  \item O que impede um atacante de simplesmente copiar todos os blocos de uma tag legítima?
+  \item Como a adição de um contador monotônico dificultaria um ataque de replay?
+\end{itemize}
+
+\subsection{Extensão sugerida}
+Altere o simulador para:
+\begin{itemize}[leftmargin=*]
+  \item trocar a chave padrão do trailer e repetir a autenticação;
+  \item reservar um bloco para armazenar um contador monotônico;
+  \item adicionar uma verificação de integridade por \textit{Message Authentication Code} (MAC).
+\end{itemize}
+
+\subsection{Conexão com a arquitetura segura}
+Ao final da prática, o aluno deve ser capaz de explicar:
+\begin{itemize}[leftmargin=*]
+  \item por que a proteção baseada apenas em chaves estáticas é insuficiente;
+  \item por que aplicações reais adicionam contador, desafio-resposta e verificação criptográfica fora da tag;
+  \item como a camada de aplicação compensa limitações conhecidas da MIFARE Classic.
+\end{itemize}
+
+\subsection{Localização do exemplo}
+Todos os arquivos usados nesta prática estão em:
+\begin{verbatim}
+docs/book/examples/cap2-rfid-mifare
+\end{verbatim}
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5em}
+\noindent\textbf{Transição para o próximo capítulo.}
+Este capítulo mostrou que a MIFARE Classic oferece uma organização de memória útil e um mecanismo de autenticação por setor, mas suas proteções nativas --- chaves estáticas de 6 bytes e a cifra CRYPTO1 --- não atendem, sozinhas, aos requisitos de segurança de sistemas modernos. A pergunta natural é: quais primitivas criptográficas uma aplicação pode adicionar sobre a tag para compensar essas limitações? O próximo capítulo responde a essa pergunta, explorando hash, HMAC, cifragem autenticada e assinaturas digitais --- exatamente as ferramentas que o DIDGuard emprega sobre a camada RFID.
+

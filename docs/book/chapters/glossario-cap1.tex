@@ -1,0 +1,40 @@
+\chapter*{Glossário do Capítulo 1}
+\addcontentsline{toc}{chapter}{Glossário do Capítulo 1}
+
+\begin{description}[
+  font=\normalfont\bfseries,
+  style=multiline,
+  leftmargin=5.1cm,
+  labelwidth=4.4cm,
+  labelsep=0.35cm,
+  itemsep=0.55\baselineskip
+]
+  \item[DID] Identificador descentralizado usado para representar um sujeito de forma verificável e independente de uma autoridade central única.
+  \item[DID Document] Documento estruturado que descreve os metadados associados a um DID, incluindo chaves, métodos de autenticação e serviços.
+  \item[Método DID] Conjunto de regras que define como um DID é criado, resolvido, atualizado e, quando aplicável, desativado.
+  \item[Resolução de DID] Processo de obter o DID Document e os metadados associados a partir de um DID.
+  \item[Dereferenciamento] Processo de obter um recurso específico associado ao DID, como uma chave identificada por fragmento ou um serviço declarado.
+  \item[Resolver] Componente que interpreta o método DID e coordena a obtenção do DID Document.
+  \item[Driver do método] Implementação específica das regras de resolução de um determinado método DID.
+  \item[Fonte de verdade] Infraestrutura onde o estado do DID está efetivamente registrado, como um servidor web, blockchain ou registro distribuído.
+  \item[W3C] Sigla de \textit{World Wide Web Consortium}, organização responsável por diversos padrões da web, incluindo o DID Core.
+  \item[Controller] Entidade que controla o DID ou um método de verificação associado a ele.
+  \item[Verification Method] Mecanismo criptográfico declarado no DID Document para verificação de assinaturas, autenticação ou outros usos.
+  \item[Authentication] Propriedade do DID Document que indica quais métodos podem ser usados para autenticar o sujeito.
+  \item[Assertion Method] Propriedade que indica quais métodos podem ser usados para assinar afirmações, como credenciais ou declarações verificáveis.
+  \item[Key Agreement] Propriedade que indica métodos aptos a estabelecer segredos compartilhados para comunicação segura.
+  \item[Service] Entrada do DID Document usada para anunciar endpoints ou recursos associados à identidade.
+  \item[Service Endpoint] Endereço do serviço associado a uma entrada de serviço no DID Document.
+  \item[JSON] Sigla de \textit{JavaScript Object Notation}, formato textual amplamente usado para troca e representação estruturada de dados.
+  \item[JWK] Sigla de \textit{JSON Web Key}, formato baseado em JSON para representação de chaves criptográficas.
+  \item[JWS] Sigla de \textit{JSON Web Signature}, formato e conjunto de convenções usados para representar assinaturas digitais em estruturas JSON.
+  \item[EC] Sigla de \textit{Elliptic Curve}, usada para indicar o emprego de criptografia baseada em curvas elípticas.
+  \item[HTTP] Sigla de \textit{Hypertext Transfer Protocol}, protocolo de aplicação usado na comunicação entre clientes e servidores web.
+  \item[HTTPS] Sigla de \textit{Hypertext Transfer Protocol Secure}, versão protegida do HTTP com uso de criptografia em trânsito.
+  \item[DHT] Sigla de \textit{Distributed Hash Table}, estrutura distribuída usada para descoberta e organização de informações em redes descentralizadas.
+  \item[IPFS] Sigla de \textit{InterPlanetary File System}, sistema distribuído de armazenamento endereçado por conteúdo.
+  \item[CID] Sigla de \textit{Content Identifier}, identificador de conteúdo usado em sistemas como IPFS para localizar dados a partir do hash do conteúdo.
+  \item[API] Sigla de interface de programação de aplicações, usada para expor operações e serviços entre sistemas.
+  \item[RFC] Sigla de \textit{Request for Comments}, série de documentos técnicos usados para padronização de protocolos e tecnologias da internet.
+  \item[URI] Sigla de \textit{Uniform Resource Identifier}, identificador padronizado usado para nomear e localizar recursos na web e em outros sistemas.
+\end{description}

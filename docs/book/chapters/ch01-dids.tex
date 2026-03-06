@@ -1,0 +1,299 @@
+\chapter{DIDs: fundamentos, estrutura e resolução}
+\label{chap:dids}
+
+\section{Objetivos de aprendizagem}
+Ao final deste capítulo, o aluno deve ser capaz de:
+\begin{itemize}[leftmargin=*]
+  \item explicar o que é um \textit{Decentralized Identifier} (DID) e por que ele difere de identificadores centralizados;
+  \item descrever os elementos que compõem um DID Document;
+  \item interpretar um exemplo completo de DID Document conforme o padrão;
+  \item explicar o processo de resolução de DID e seus principais atores;
+  \item distinguir resolução de DID, dereferenciamento e acesso a serviços vinculados.
+\end{itemize}
+\section{O que é um DID}
+Um DID (\textit{Decentralized Identifier}) é um identificador global, controlado criptograficamente, que não depende de uma autoridade central única para sua gestão. De acordo com o padrão DID Core, publicado pelo \textit{World Wide Web Consortium} (W3C), um DID identifica um sujeito --- pessoa, organização, dispositivo, agente de software ou outro recurso --- e aponta para um DID Document com metadados necessários para verificação e interação \citep{w3c_did_core}.
+
+A forma geral de um DID é:
+\begin{quote}
+\texttt{did:<método>:<identificador-específico>}
+\end{quote}
+
+Exemplos:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{did:web:example.com}
+  \item \texttt{did:key:z6Mk...}
+  \item \texttt{did:example:123456789abcdefghi}
+\end{itemize}
+
+Cada método DID define como o identificador é criado, resolvido, atualizado e, quando aplicável, desativado. Por isso, a semântica operacional de um DID sempre depende do método associado.
+
+\section{Por que usar DIDs}
+Identificadores tradicionais costumam depender de diretórios centralizados, provedores de identidade ou bancos de dados administrados por uma única organização. DIDs foram propostos para viabilizar identidades mais portáveis, verificáveis e interoperáveis.
+
+Entre as vantagens arquiteturais mais importantes, destacam-se:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Controle criptográfico}: a autenticação e a prova de controle dependem de chaves e assinaturas, e não apenas de cadastro em base central;
+  \item \textbf{Portabilidade}: o identificador pode ser reutilizado entre sistemas diferentes, desde que compartilhem o método e as regras de resolução;
+  \item \textbf{Verificabilidade}: chaves, serviços e vínculos podem ser auditados com base em documentos e evidências técnicas;
+  \item \textbf{Separação entre identidade e aplicação}: o DID representa a identidade; as regras de negócio ficam em camadas superiores.
+\end{itemize}
+
+\section{DID Document}
+O DID Document é a representação estruturada dos metadados associados a um DID. Em implementações práticas, ele costuma ser serializado em \textit{JavaScript Object Notation} (JSON). Ele informa como um sujeito pode ser autenticado, quais métodos de verificação são válidos e quais serviços podem ser descobertos por meio daquela identidade.
+
+Nem todo DID Document terá exatamente os mesmos campos. O conteúdo depende:
+\begin{itemize}[leftmargin=*]
+  \item do método DID;
+  \item do domínio da aplicação;
+  \item dos mecanismos de autenticação e prova adotados;
+  \item das extensões e registries utilizados.
+\end{itemize}
+
+\section{Exemplo completo de DID Document}
+O exemplo a seguir ilustra um DID Document didático contendo os campos mais comuns do padrão:
+
+Antes de examinar o JSON, vale notar três siglas presentes no exemplo: \textit{JSON Web Key} (JWK), usado no campo \texttt{publicKeyJwk}; \textit{JSON Web Signature} (JWS), referenciado no contexto \texttt{jws-2020}; e \textit{Elliptic Curve} (EC), indicado no campo \texttt{kty}.
+
+\begin{verbatim}
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:example:123456789abcdefghi",
+  "controller": "did:example:123456789abcdefghi",
+  "verificationMethod": [
+    {
+      "id": "did:example:123456789abcdefghi#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:example:123456789abcdefghi",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "f83OJ3D2xF4r5n6Q7s8t9u0v1w2y3z4A5B6C7D8E9F0",
+        "y": "x_FEzRu9h2QvW0Ykq1c2d3e4f5g6h7i8j9kLmNoPqRs"
+      }
+    }
+  ],
+  "authentication": [
+    "did:example:123456789abcdefghi#key-1"
+  ],
+  "assertionMethod": [
+    "did:example:123456789abcdefghi#key-1"
+  ],
+  "keyAgreement": [
+    "did:example:123456789abcdefghi#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:example:123456789abcdefghi#messaging",
+      "type": "MessagingService",
+      "serviceEndpoint": "https://example.org/messages"
+    }
+  ]
+}
+\end{verbatim}
+
+\section{Explicação dos campos do exemplo}
+\begin{itemize}[leftmargin=*]
+  \item \texttt{@context}: define os contextos semânticos usados na interpretação do documento. O primeiro contexto normalmente aponta para o núcleo do padrão DID. No exemplo, o segundo contexto referencia a suíte \textit{JSON Web Signature} (JWS) 2020.
+  \item \texttt{id}: é o próprio DID que este documento descreve. Deve coincidir com o identificador resolvido.
+  \item \texttt{controller}: informa quem controla o DID ou o recurso descrito. Em muitos casos, o controlador coincide com o próprio \texttt{id}, mas isso não é obrigatório.
+  \item \texttt{verificationMethod}: lista os métodos de verificação associados ao DID. Cada entrada descreve uma chave ou mecanismo de verificação.
+  \item \texttt{verificationMethod[].id}: identificador único do método de verificação. Frequentemente usa um fragmento, como \texttt{\#key-1}.
+  \item \texttt{verificationMethod[].type}: tipo do método de verificação, conforme registries e suites criptográficas aceitas.
+  \item \texttt{verificationMethod[].controller}: entidade controladora daquele método específico.
+  \item \texttt{publicKeyJwk}: representação da chave pública em formato \textit{JSON Web Key} (JWK). Em outros documentos, a chave pode aparecer em formatos alternativos, como \texttt{publicKeyMultibase}. No exemplo, o valor \texttt{EC} em \texttt{kty} indica o uso de \textit{Elliptic Curve}.
+  \item \texttt{authentication}: lista quais métodos podem ser usados para autenticação do sujeito.
+  \item \texttt{assertionMethod}: lista os métodos autorizados para emitir ou assinar afirmações, como credenciais e declarações verificáveis.
+  \item \texttt{keyAgreement}: lista métodos aptos a estabelecer segredos compartilhados, em cenários de troca segura de mensagens.
+  \item \texttt{service}: lista pontos de serviço vinculados ao DID, como endpoints de mensageria, descoberta, resolução auxiliar ou interfaces de programação de aplicações (APIs) específicas.
+  \item \texttt{serviceEndpoint}: endereço do serviço associado. Não é, por si só, prova de autenticidade; é apenas um vínculo declarado pelo documento.
+\end{itemize}
+
+\section{Campos mínimos e extensões}
+Na prática, um DID Document pode ser mais enxuto ou mais rico do que o exemplo anterior. Há documentos que incluem apenas:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{@context};
+  \item \texttt{id};
+  \item um ou mais \texttt{verificationMethod};
+  \item uma forma de autenticação.
+\end{itemize}
+
+Por outro lado, aplicações específicas podem acrescentar:
+\begin{itemize}[leftmargin=*]
+  \item serviços personalizados;
+  \item chaves segregadas por propósito;
+  \item metadados operacionais;
+  \item vínculos com infraestrutura de armazenamento distribuído ou registradores externos.
+\end{itemize}
+
+\section{Resolução de DID}
+A resolução de DID é o processo de obter, a partir de um DID, o DID Document correspondente e os metadados associados a essa operação. Em termos conceituais, resolver um DID significa responder à pergunta: \textit{``qual é o documento atual e verificável que descreve esta identidade?''}
+
+Esse processo envolve, em geral, quatro atores:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Cliente}: aplicação que precisa do DID Document;
+  \item \textbf{Resolver}: componente que interpreta o método DID e coordena a busca;
+  \item \textbf{Driver ou adaptador do método}: implementação específica de cada método;
+  \item \textbf{Fonte de verdade}: infraestrutura onde o estado do DID está registrado, como \textit{Hypertext Transfer Protocol} (HTTP), blockchain, \textit{Distributed Hash Table} (DHT), banco distribuído ou outro registro verificável.
+\end{itemize}
+
+\section{Saídas da resolução}
+Em uma implementação completa, a resolução não devolve apenas o DID Document. Ela costuma produzir três grupos de informação:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{DID Document}: o conteúdo resolvido;
+  \item \textbf{Metadados do documento}: informações como versão, atualização, desativação ou equivalências;
+  \item \textbf{Metadados da resolução}: informações sobre o próprio processo, incluindo erros, método usado, cache e opções de resolução.
+\end{itemize}
+
+\section{Fluxo genérico de resolução}
+Embora cada método DID tenha seu próprio comportamento, o fluxo genérico costuma seguir a sequência abaixo:
+\begin{enumerate}[leftmargin=*]
+  \item o cliente fornece um DID ao resolvedor;
+  \item o resolvedor identifica o método, por exemplo \texttt{web}, \texttt{key} ou outro;
+  \item o adaptador daquele método aplica as regras de resolução correspondentes;
+  \item o sistema consulta a fonte de verdade do método;
+  \item o documento obtido é validado e normalizado;
+  \item o resultado é devolvido ao cliente com documento e metadados.
+\end{enumerate}
+
+\section{Exemplos de resolução por método}
+\begin{itemize}[leftmargin=*]
+  \item \textbf{\texttt{did:web}}: a resolução é feita via \textit{Hypertext Transfer Protocol Secure} (HTTPS), normalmente recuperando um arquivo como \texttt{/.well-known/did.json} ou caminho equivalente no domínio.
+  \item \textbf{\texttt{did:key}}: a resolução é local e determinística, pois a chave pública já está embutida no próprio identificador.
+  \item \textbf{Métodos ancorados em blockchain}: a resolução exige consulta ao registro on-chain, leitura de eventos, estados ou apontadores para dados externos.
+\end{itemize}
+
+\section{Resolução em arquiteturas com registro verificável e IPFS}
+Em arquiteturas didáticas ou experimentais, é comum separar:
+\begin{itemize}[leftmargin=*]
+  \item um \textbf{registro verificável}, responsável por manter o vínculo entre DID e uma referência estável;
+  \item um \textbf{armazenamento distribuído}, como o \textit{InterPlanetary File System} (IPFS), responsável por hospedar o documento completo.
+\end{itemize}
+
+Um fluxo típico é:
+\begin{enumerate}[leftmargin=*]
+  \item resolver o DID no registro verificável;
+  \item obter um ponteiro, como um hash, um \textit{Content Identifier} (CID) ou um identificador de versão;
+  \item recuperar o documento na camada de armazenamento;
+  \item validar se o documento recuperado é coerente com o vínculo registrado.
+\end{enumerate}
+
+Essa abordagem ajuda a separar governança de identidade, auditabilidade e armazenamento por conteúdo.
+
+\section{Resolução versus dereferenciamento}
+É importante não confundir resolução com dereferenciamento.
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Resolução}: retorna o DID Document associado a um DID.
+  \item \textbf{Dereferenciamento}: resolve um recurso específico dentro desse universo, como um fragmento \texttt{\#key-1} ou um serviço particular.
+\end{itemize}
+
+Exemplo:
+\begin{itemize}[leftmargin=*]
+  \item resolver \texttt{did:example:123456789abcdefghi} significa obter o DID Document completo;
+  \item dereferenciar \texttt{did:example:123456789abcdefghi\#key-1} significa obter o método de verificação específico apontado pelo fragmento.
+\end{itemize}
+
+\section{Cuidados técnicos no processo de resolução}
+Ao projetar ou implementar resolução de DID, alguns cuidados são essenciais:
+\begin{itemize}[leftmargin=*]
+  \item validar a autenticidade da fonte de verdade;
+  \item tratar indisponibilidade, timeout e inconsistência entre registro e documento;
+  \item registrar metadados de erro e rastreabilidade da resolução;
+  \item considerar cache com critério, para não servir documentos desatualizados;
+  \item proteger informações sensíveis que não devam ser publicadas em documentos resolvíveis.
+\end{itemize}
+
+\section{Boas práticas de modelagem}
+\begin{itemize}[leftmargin=*]
+  \item manter o DID Document focado em dados necessários para verificação e descoberta;
+  \item separar dados sensíveis de metadados públicos;
+  \item escolher formatos de chave e serviços alinhados ao ecossistema do método DID;
+  \item documentar critérios de atualização, revogação e desativação.
+\end{itemize}
+
+\section{Exercícios sugeridos}
+\begin{enumerate}[leftmargin=*]
+  \item comparar os métodos \texttt{did:key}, \texttt{did:web} e um método ancorado em blockchain;
+  \item identificar, no exemplo deste capítulo, quais campos são voltados para autenticação, quais são voltados para assinatura de afirmações e quais são voltados para descoberta de serviços;
+  \item desenhar um fluxo de resolução para uma arquitetura que use contrato inteligente e IPFS;
+  \item explicar, com um diagrama simples, a diferença entre resolução e dereferenciamento.
+\end{enumerate}
+
+\section{Leituras recomendadas}
+\begin{itemize}[leftmargin=*]
+  \item W3C DID Core, norma principal sobre modelo de dados e semântica \citep{w3c_did_core};
+  \item W3C DID Specification Registries, para métodos, tipos e registries de apoio \citep{w3c_did_spec_registries};
+  \item DID Resolution, para aprofundamento do processo de resolução e metadados \citep{w3c_did_resolution};
+  \item \textit{Request for Comments} (RFC) 3986, para sintaxe geral de identificadores \textit{Uniform Resource Identifier} (URI) \citep{rfc3986};
+  \item W3C Verifiable Credentials Data Model, para integração entre identidade e credenciais verificáveis \citep{w3c_vc_data_model}.
+\end{itemize}
+
+\section{Rodando na prática}
+O objetivo desta prática é executar um resolvedor mínimo de \texttt{did:web}, publicar localmente um \textit{DID Document} e observar, passo a passo, como um DID é convertido em um recurso resolvível.
+
+\subsection{Pré-requisitos}
+\begin{itemize}[leftmargin=*]
+  \item Node.js 18 ou superior;
+  \item terminal com suporte aos comandos do Node;
+  \item diretório \texttt{docs/book/examples/cap1-did-resolution} disponível localmente.
+\end{itemize}
+
+\subsection{Arquivos do laboratório}
+O mini projeto deste capítulo contém:
+\begin{verbatim}
+did.json
+server.mjs
+resolve.mjs
+\end{verbatim}
+
+\subsection{Executando}
+No diretório do laboratório, abra dois terminais. No primeiro:
+\begin{verbatim}
+node server.mjs
+\end{verbatim}
+
+No segundo:
+\begin{verbatim}
+node resolve.mjs did:web:localhost%3A8081:users:alice
+\end{verbatim}
+
+\subsection{O que observar}
+\begin{itemize}[leftmargin=*]
+  \item a regra de transformação do identificador \texttt{did:web} em URL;
+  \item a recuperação do documento \texttt{did.json} por HTTP;
+  \item a estrutura retornada, com \texttt{id}, \texttt{verificationMethod}, \texttt{authentication} e \texttt{service};
+  \item a diferença entre o identificador abstrato e o recurso concreto acessado durante a resolução.
+\end{itemize}
+
+\subsection{Perguntas de análise}
+\begin{itemize}[leftmargin=*]
+  \item Por que o laboratório usa HTTP em vez de HTTPS?
+  \item Qual é a diferença entre resolver um DID e dereferenciar um fragmento como \texttt{\#key-1}?
+  \item O que aconteceria se o arquivo \texttt{did.json} não contivesse o campo \texttt{id}?
+  \item Como esse mecanismo de resolução se compara a uma consulta em diretório centralizado?
+\end{itemize}
+
+\subsection{Extensão sugerida}
+Altere o arquivo \texttt{did.json} para:
+\begin{itemize}[leftmargin=*]
+  \item adicionar um novo \texttt{serviceEndpoint};
+  \item trocar o identificador do controlador;
+  \item incluir uma segunda chave em \texttt{verificationMethod}.
+\end{itemize}
+
+Depois repita a execução e verifique como a mudança afeta a saída do resolvedor.
+
+\subsection{Localização do exemplo}
+Todos os arquivos usados nesta prática estão em:
+\begin{verbatim}
+docs/book/examples/cap1-did-resolution
+\end{verbatim}
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5em}
+\noindent\textbf{Transição para o próximo capítulo.}
+Até aqui, o foco esteve na camada lógica da identidade: como um DID é estruturado, publicado e resolvido. No entanto, em um sistema de controle de acesso físico como o DIDGuard, essa identidade precisa estar associada a uma credencial tangível --- um cartão, tag ou dispositivo que o portador apresenta a um leitor. O próximo capítulo explora essa camada física, investigando como as tags RFID MIFARE Classic organizam sua memória, autenticam setores e --- sobretudo --- por que suas proteções nativas não são suficientes quando usadas isoladamente.
+

@@ -1,0 +1,283 @@
+\chapter{Fundamentos de Criptografia Aplicada}
+\label{chap:criptografia-aplicada}
+
+\section{Objetivos de aprendizagem}
+Ao final deste capítulo, o aluno deve ser capaz de:
+\begin{itemize}[leftmargin=*]
+  \item distinguir integridade, autenticidade, confidencialidade e não repúdio;
+  \item explicar o papel de funções hash, \textit{Hash-based Message Authentication Code} (HMAC) e cifras autenticadas;
+  \item descrever os conceitos básicos de criptografia simétrica e assimétrica;
+  \item compreender o uso de curvas elípticas, chaves públicas e assinaturas digitais em sistemas distribuídos;
+  \item justificar o uso de \textit{nonce}, contador e mecanismos anti-replay em protocolos de acesso;
+  \item relacionar esses fundamentos com a arquitetura de um sistema como o DIDGuard.
+\end{itemize}
+\section{Propriedades de segurança fundamentais}
+Quatro propriedades aparecem com frequência em sistemas distribuídos:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{Integridade}: garante que o conteúdo não foi alterado sem detecção.
+  \item \textbf{Autenticidade}: fornece evidências de quem gerou ou aprovou a mensagem.
+  \item \textbf{Confidencialidade}: protege o conteúdo contra leitura indevida.
+  \item \textbf{Não repúdio}: dificulta que o autor de uma assinatura válida negue ter produzido aquela evidência.
+\end{itemize}
+
+Nem todo mecanismo entrega todas essas propriedades ao mesmo tempo. Uma função hash, por exemplo, ajuda na integridade, mas não oferece confidencialidade. Uma cifra simétrica protege confidencialidade, mas não substitui uma assinatura digital. Um bom projeto depende de combinar mecanismos adequados ao objetivo.
+
+\section{Funções hash criptográficas}
+Uma função hash criptográfica recebe uma entrada de tamanho arbitrário e produz uma saída de tamanho fixo, chamada de resumo ou digest. Na prática, algoritmos como a família \textit{Secure Hash Algorithm} (SHA) são usados para condensar dados e permitir verificações rápidas de integridade \citep{fips180_4}.
+
+\subsection{Propriedades esperadas}
+Uma função hash criptográfica moderna deve buscar, idealmente:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{resistência à pré-imagem}: dado o hash, deve ser computacionalmente impraticável encontrar uma entrada que o gere;
+  \item \textbf{resistência à segunda pré-imagem}: dada uma entrada, deve ser impraticável encontrar outra com o mesmo hash;
+  \item \textbf{resistência a colisões}: deve ser impraticável encontrar duas entradas distintas que produzam o mesmo hash.
+\end{itemize}
+
+\subsection{SHA-256}
+No contexto de aplicações modernas, o \textit{Secure Hash Algorithm} 256 (SHA-256) é uma escolha comum para:
+\begin{itemize}[leftmargin=*]
+  \item resumir documentos;
+  \item identificar conteúdo;
+  \item construir provas de integridade;
+  \item alimentar mecanismos como HMAC e derivação de material auxiliar.
+\end{itemize}
+
+Se dois sistemas calculam o mesmo SHA-256 sobre o mesmo conteúdo, eles devem obter exatamente o mesmo resultado. Essa previsibilidade é essencial para detecção de alteração e endereçamento por conteúdo.
+
+\section{Hash não é criptografia de sigilo}
+Um erro comum em projetos iniciantes é tratar hash como se fosse criptografia reversível. Hash não é feito para ``descriptografar'' depois. Ele é uma transformação unidirecional, usada principalmente para verificação, indexação e comparação segura de conteúdos.
+
+Isso significa que:
+\begin{itemize}[leftmargin=*]
+  \item hash não substitui cifra quando o objetivo é manter um dado secreto;
+  \item hash também não prova autoria por si só;
+  \item para autenticar mensagens, é preciso combinar hash com chave secreta ou assinatura digital.
+\end{itemize}
+
+\section{Código de autenticação de mensagem (MAC) e HMAC}
+Um \textit{Message Authentication Code} (MAC) é um valor criptográfico calculado sobre uma mensagem com uso de chave secreta compartilhada. Seu objetivo é permitir que quem conhece a chave verifique integridade e autenticidade da mensagem.
+
+Uma das construções mais difundidas é o \textit{Hash-based Message Authentication Code} (HMAC), padronizado na \textit{Request for Comments} (RFC) 2104 \citep{rfc2104}. Ele combina uma função hash com uma chave secreta de modo robusto e amplamente adotado.
+
+\subsection{Intuição de uso}
+Se duas partes compartilham a mesma chave secreta, ambas podem:
+\begin{enumerate}[leftmargin=*]
+  \item calcular o HMAC de uma mensagem;
+  \item transmitir mensagem e HMAC;
+  \item recomputar o HMAC no destino;
+  \item comparar os valores recebidos e calculados.
+\end{enumerate}
+
+Se o valor divergir, algo está errado: a mensagem foi alterada, a chave não coincide ou a origem não é confiável.
+
+\subsection{Quando HMAC é útil}
+HMAC costuma ser uma boa escolha para:
+\begin{itemize}[leftmargin=*]
+  \item autenticação entre dispositivos e backend;
+  \item proteção de contadores, estados e desafios;
+  \item validação de dados gravados em memória local ou tag, quando há segredo compartilhado.
+\end{itemize}
+
+Por outro lado, HMAC não resolve cenários em que múltiplos verificadores precisam validar a mensagem sem conhecer a chave secreta. Nesses casos, assinaturas digitais são mais adequadas.
+
+\section{Criptografia simétrica}
+Na criptografia simétrica, a mesma chave, ou chaves diretamente relacionadas, é usada para cifrar e decifrar. O foco principal costuma ser confidencialidade.
+
+O \textit{Advanced Encryption Standard} (AES) é o padrão mais conhecido nessa categoria \citep{fips197}. Ele é amplamente empregado em:
+\begin{itemize}[leftmargin=*]
+  \item proteção de dados sensíveis em repouso;
+  \item canais de comunicação;
+  \item cifras autenticadas como o modo \textit{Galois/Counter Mode} (GCM).
+\end{itemize}
+
+\subsection{AES-GCM}
+O modo \textit{Galois/Counter Mode} (GCM) combina cifragem e autenticação em uma única construção. Em outras palavras, ele oferece confidencialidade e integridade/autenticidade do texto cifrado e de dados associados \citep{sp800_38d}.
+
+Esse tipo de construção é útil quando o sistema precisa:
+\begin{itemize}[leftmargin=*]
+  \item cifrar um conteúdo sensível;
+  \item garantir que ele não foi alterado;
+  \item rejeitar mensagens adulteradas antes de aceitar o resultado da decifragem.
+\end{itemize}
+
+Para funcionar corretamente, cifras autenticadas dependem de detalhes operacionais importantes, como:
+\begin{itemize}[leftmargin=*]
+  \item uso correto de chave;
+  \item geração adequada de vetores de inicialização ou nonces;
+  \item proibição de reutilização indevida de parâmetros críticos.
+\end{itemize}
+
+\section{Criptografia assimétrica}
+Na criptografia assimétrica, cada entidade possui um par de chaves:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{chave privada}: deve permanecer secreta e sob controle do titular;
+  \item \textbf{chave pública}: pode ser distribuída a verificadores e serviços.
+\end{itemize}
+
+Esse modelo é central em identidades descentralizadas, assinatura de mensagens, autenticação de dispositivos e verificação por terceiros.
+
+\subsection{O que a assimetria permite}
+Com pares de chaves, um sistema pode:
+\begin{itemize}[leftmargin=*]
+  \item assinar dados com a chave privada;
+  \item verificar assinaturas com a chave pública;
+  \item estabelecer vínculos entre identidade lógica e material criptográfico;
+  \item permitir que múltiplos verificadores validem evidências sem acesso ao segredo privado.
+\end{itemize}
+
+\section{Curvas elípticas e ECDSA}
+Em muitos sistemas embarcados ou distribuídos, usa-se criptografia baseada em curvas elípticas por oferecer boa segurança com chaves menores que alternativas clássicas. O \textit{Elliptic Curve Digital Signature Algorithm} (ECDSA) é um dos mecanismos mais conhecidos nesse espaço \citep{fips186_5,sp800_186}.
+
+\subsection{Por que curvas elípticas são populares}
+Elas costumam ser adotadas porque:
+\begin{itemize}[leftmargin=*]
+  \item reduzem custo de armazenamento de chaves;
+  \item diminuem o volume de dados transmitidos;
+  \item atendem bem a cenários com microcontroladores e dispositivos restritos.
+\end{itemize}
+
+\subsection{Assinatura digital em alto nível}
+Em termos conceituais, o fluxo de assinatura digital é:
+\begin{enumerate}[leftmargin=*]
+  \item gerar um resumo do conteúdo ou da mensagem;
+  \item produzir uma assinatura com a chave privada;
+  \item transmitir conteúdo e assinatura;
+  \item verificar a assinatura com a chave pública correspondente.
+\end{enumerate}
+
+Se a verificação for bem-sucedida, o verificador ganha evidências de que:
+\begin{itemize}[leftmargin=*]
+  \item o conteúdo não foi alterado desde a assinatura;
+  \item a assinatura foi produzida por quem controla a chave privada associada.
+\end{itemize}
+
+Em implementações reais, o processo também depende de parâmetros como geração segura do valor efêmero da assinatura. Há inclusive padronização para uso determinístico desse valor em certos contextos \citep{rfc6979}.
+
+\section{Nonce, contador e anti-replay}
+Mesmo quando integridade e autenticidade estão corretas, um sistema ainda pode falhar se aceitar repetição de mensagens antigas válidas. Esse é o problema de replay.
+
+Dois mecanismos comuns para mitigar replay são:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{nonce}: valor único, normalmente aleatório ou pseudoaleatório, usado uma única vez;
+  \item \textbf{contador monotônico}: valor que aumenta a cada operação válida, impedindo reutilização de estados antigos.
+\end{itemize}
+
+\subsection{Exemplo conceitual}
+Considere um pedido de autorização assinado ou protegido por HMAC. Se esse pedido puder ser retransmitido mais tarde exatamente igual, um atacante pode tentar reutilizá-lo. Ao incluir um nonce ou um contador esperado pelo verificador, o protocolo passa a distinguir uma mensagem nova de uma repetição indevida.
+
+\subsection{Requisitos de projeto}
+Para esses mecanismos funcionarem bem, é preciso:
+\begin{itemize}[leftmargin=*]
+  \item registrar se o nonce já foi usado;
+  \item proteger o contador contra adulteração;
+  \item sincronizar corretamente o estado entre as partes;
+  \item rejeitar mensagens fora da janela esperada.
+\end{itemize}
+
+\section{Derivação e gestão de chaves}
+Outro ponto central em criptografia aplicada é a gestão de chaves. Não basta escolher bons algoritmos; é preciso definir:
+\begin{itemize}[leftmargin=*]
+  \item onde a chave nasce;
+  \item onde ela é armazenada;
+  \item quem pode usá-la;
+  \item quando ela expira ou deve ser rotacionada;
+  \item como derivar chaves específicas para contextos diferentes.
+\end{itemize}
+
+Em muitos sistemas, uma chave-mestra não é usada diretamente em todas as operações. Em vez disso, o sistema deriva material específico por dispositivo, usuário, tag ou sessão. Isso reduz impacto de comprometimentos parciais e ajuda a compartimentar responsabilidades.
+
+\section{Aplicação desses conceitos em uma arquitetura como o DIDGuard}
+Em um sistema de controle de acesso com identidade descentralizada e dispositivos físicos, esses conceitos aparecem de forma concreta:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{hash}: usado para resumir conteúdo, criar identificadores derivados e verificar integridade;
+  \item \textbf{HMAC}: usado para proteger estados, desafios e dados associados a uma tag ou sessão;
+  \item \textbf{criptografia simétrica}: usada para proteger dados sensíveis, como material biométrico cifrado antes do armazenamento;
+  \item \textbf{criptografia assimétrica}: usada para identidade, assinatura e verificação de provas por terceiros;
+  \item \textbf{nonce e contador}: usados para evitar replay em protocolos de autenticação;
+  \item \textbf{gestão de chaves}: usada para separar segredos por dispositivo, tag, usuário ou função do sistema.
+\end{itemize}
+
+Essa combinação permite tratar a credencial física como apenas uma parte do protocolo, em vez de confiar cegamente que a segurança nativa da tag resolve sozinha o problema do acesso.
+
+\section{Erros comuns em projetos iniciantes}
+Alguns erros aparecem com frequência:
+\begin{itemize}[leftmargin=*]
+  \item usar apenas o identificador de uma tag como prova de identidade;
+  \item armazenar segredo sensível sem cifragem adequada;
+  \item confundir hash com criptografia reversível;
+  \item reutilizar nonce ou contador sem controle;
+  \item misturar a função de autenticação com a função de autorização;
+  \item assumir que um algoritmo forte compensa uma gestão de chaves fraca.
+\end{itemize}
+
+Criptografia aplicada é tanto sobre algoritmos quanto sobre protocolo, implementação, armazenamento e operação.
+
+\section{Leituras recomendadas}
+\begin{itemize}[leftmargin=*]
+  \item \textit{Federal Information Processing Standards} (FIPS) 180-4, para funções hash da família SHA \citep{fips180_4};
+  \item RFC 2104, para fundamentos e construção de HMAC \citep{rfc2104};
+  \item FIPS 197, para o algoritmo AES \citep{fips197};
+  \item \textit{National Institute of Standards and Technology} (NIST) SP 800-38D, para AES-GCM e \textit{Galois Message Authentication Code} (GMAC) \citep{sp800_38d};
+  \item FIPS 186-5, para assinatura digital \citep{fips186_5};
+  \item NIST SP 800-186, para parâmetros de curvas elípticas \citep{sp800_186};
+  \item RFC 6979, para uso determinístico em assinaturas ECDSA \citep{rfc6979}.
+\end{itemize}
+
+\section{Rodando na prática}
+O objetivo desta prática é executar um laboratório autocontido de criptografia aplicada para observar, em um único fluxo, hash, HMAC, cifragem autenticada e assinatura digital.
+
+\subsection{Pré-requisitos}
+\begin{itemize}[leftmargin=*]
+  \item Node.js 18 ou superior;
+  \item terminal com suporte aos comandos do Node;
+  \item diretório \texttt{docs/book/examples/cap3-crypto-aplicada} disponível localmente.
+\end{itemize}
+
+\subsection{Arquivos do laboratório}
+O mini projeto deste capítulo contém:
+\begin{verbatim}
+crypto-lab.mjs
+\end{verbatim}
+
+\subsection{Executando}
+No diretório do laboratório:
+\begin{verbatim}
+node crypto-lab.mjs
+\end{verbatim}
+
+\subsection{O que observar}
+\begin{itemize}[leftmargin=*]
+  \item o \textit{digest} SHA-256 produzido a partir de uma mensagem simples;
+  \item a diferença entre o valor do hash e o valor do HMAC;
+  \item a cifragem e a decifragem com \texttt{AES-256-GCM};
+  \item a validação de uma assinatura ECDSA para a mensagem original e a falha para a mensagem alterada.
+\end{itemize}
+
+\subsection{Perguntas de análise}
+\begin{itemize}[leftmargin=*]
+  \item Em que cenário um hash sozinho é suficiente?
+  \item Em que cenário é necessário um HMAC?
+  \item O que a \texttt{authTag} do modo GCM protege?
+  \item Por que a verificação de assinatura falha quando a mensagem é alterada?
+\end{itemize}
+
+\subsection{Extensão sugerida}
+Altere o laboratório para:
+\begin{itemize}[leftmargin=*]
+  \item usar um \textit{nonce} fixo e discutir o risco resultante;
+  \item substituir a mensagem por um pequeno vetor serializado em JSON;
+  \item gerar uma segunda assinatura com outro par de chaves e comparar os resultados.
+\end{itemize}
+
+\subsection{Localização do exemplo}
+Todos os arquivos usados nesta prática estão em:
+\begin{verbatim}
+docs/book/examples/cap3-crypto-aplicada
+\end{verbatim}
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5em}
+\noindent\textbf{Transição para o próximo capítulo.}
+As primitivas apresentadas neste capítulo --- hash, HMAC, cifragem autenticada e assinaturas digitais --- permitem proteger dados, autenticar mensagens e verificar identidades. Porém, resta uma questão-chave: onde ficam as regras de acesso e como elas podem ser verificadas de forma auditável por múltiplas partes? O próximo capítulo introduz blockchain e contratos inteligentes como camada verificável de política, mostrando como registrar, consultar e auditar permissões de acesso em um ambiente onde nenhum participante isolado controla a verdade.
+

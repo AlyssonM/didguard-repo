@@ -1,0 +1,42 @@
+\chapter*{Glossário do Capítulo 4}
+\addcontentsline{toc}{chapter}{Glossário do Capítulo 4}
+
+\begin{description}[
+  font=\normalfont\bfseries,
+  style=multiline,
+  leftmargin=5.6cm,
+  labelwidth=4.9cm,
+  labelsep=0.35cm,
+  itemsep=0.55\baselineskip
+]
+  \item[ABI] Sigla de \textit{Application Binary Interface}, interface binária que define como interagir com um contrato inteligente a partir de código externo.
+  \item[Blockchain] Estrutura de livro-razão distribuído em que blocos de transações são encadeados por referências criptográficas e validados segundo regras de consenso.
+  \item[Bloco] Agrupamento ordenado de transações e metadados em uma blockchain, vinculado ao bloco anterior por hash criptográfico.
+  \item[Bytecode] Código compilado de um contrato inteligente, executado pela EVM em cada nó validador da rede.
+  \item[Consenso] Conjunto de regras e mecanismos pelos quais uma rede distribuída concorda sobre a ordem e a validade das alterações de estado.
+  \item[Conta de contrato] Conta controlada pelo código de um contrato inteligente implantado na blockchain, sem chave privada externa.
+  \item[Conta externa] Conta controlada por uma chave privada de usuário ou serviço, capaz de iniciar transações na rede.
+  \item[Contrato inteligente] Programa armazenado na blockchain e executado de forma determinística pela plataforma, sem possibilidade de alteração após o deploy.
+  \item[Deploy] Processo de implantar um contrato inteligente na blockchain, criando uma nova conta de contrato com o bytecode compilado.
+  \item[Estado on-chain] Conjunto de dados atualmente mantido e validado pela blockchain como estado oficial do protocolo.
+  \item[Ethereum] Plataforma blockchain programável que permite a execução de contratos inteligentes em um ambiente de máquina virtual distribuída.
+  \item[Evento] Registro emitido por um contrato inteligente durante a execução, armazenado nos logs da transação e indexável por aplicações externas.
+  \item[EVM] Sigla de \textit{Ethereum Virtual Machine}, máquina abstrata que executa o bytecode dos contratos de forma determinística em todos os nós da rede.
+  \item[Função de escrita] Função de contrato que altera estado on-chain, gerando uma transação que consome gas e precisa ser minerada.
+  \item[Função de leitura] Função de contrato marcada como \texttt{view} ou \texttt{pure}, que consulta estado sem alterá-lo e sem consumir gas.
+  \item[Gas] Unidade abstrata de custo computacional usada para medir e cobrar execução e armazenamento em plataformas como Ethereum.
+  \item[Hardhat] Framework de desenvolvimento para contratos Solidity, que inclui compilação, testes, deploy e rede local para simulação.
+  \item[Hash do bloco] Referência criptográfica que vincula cada bloco ao anterior, formando a cadeia que dá nome à blockchain.
+  \item[Imutabilidade] Propriedade de dados ou código on-chain que não podem ser alterados após a gravação, garantindo integridade histórica.
+  \item[Mapping] Estrutura de dados do Solidity equivalente a uma tabela hash, usada para associar chaves a valores com acesso O(1).
+  \item[Mineração] Processo pelo qual nós da rede validam transações e blocos, aplicando regras de consenso para determinar o próximo estado.
+  \item[Modifier] Construção do Solidity que adiciona verificações pré ou pós-execução a funções de contrato, como controle de permissão.
+  \item[Nó] Instância participante de uma rede blockchain que valida, propaga, consulta ou armazena o estado compartilhado.
+  \item[Off-chain] Dados ou computações que ocorrem fora da blockchain, tipicamente em serviços auxiliares, para reduzir custo e preservar privacidade.
+  \item[On-chain] Dados ou computações que ocorrem dentro da blockchain, com garantias de verificabilidade, imutabilidade e rastreabilidade.
+  \item[Receipt] Recibo de uma transação confirmada, contendo hash, status, gas consumido e logs de eventos emitidos pelo contrato.
+  \item[Relayer] Componente intermediário que conecta dispositivos de borda (como o ESP32) à blockchain, encaminhando transações e consultas.
+  \item[Solidity] Linguagem de programação orientada a contratos, usada para escrever contratos inteligentes na plataforma Ethereum e compatíveis.
+  \item[Struct] Tipo de dado composto em Solidity que agrupa campos relacionados em uma única estrutura, como o \texttt{AccessRecord} do laboratório.
+  \item[Transação] Operação submetida à blockchain para transferir valor, invocar código ou alterar estado, assinada pela conta remetente.
+\end{description}

@@ -1,0 +1,33 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/did/v1",
+    "https://w3id.org/security/suites/jws-2020/v1"
+  ],
+  "id": "did:web:localhost%3A8081:users:alice",
+  "verificationMethod": [
+    {
+      "id": "did:web:localhost%3A8081:users:alice#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "did:web:localhost%3A8081:users:alice",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "f83OJ3D2xF4xj9JQ2M5kDkU95syEHCqB6fINn6zkRgA",
+        "y": "x_FEzRu9l8VxRxRuJ8WcN6iYG3PaY5E9OQj1YxDCEV4"
+      }
+    }
+  ],
+  "authentication": [
+    "did:web:localhost%3A8081:users:alice#key-1"
+  ],
+  "assertionMethod": [
+    "did:web:localhost%3A8081:users:alice#key-1"
+  ],
+  "service": [
+    {
+      "id": "did:web:localhost%3A8081:users:alice#profile",
+      "type": "LinkedDomains",
+      "serviceEndpoint": "http://localhost:8081/users/alice/profile"
+    }
+  ]
+}

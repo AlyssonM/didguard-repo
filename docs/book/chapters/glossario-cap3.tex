@@ -1,0 +1,45 @@
+\chapter*{Glossário do Capítulo 3}
+\addcontentsline{toc}{chapter}{Glossário do Capítulo 3}
+
+\begin{description}[
+  font=\normalfont\bfseries,
+  style=multiline,
+  leftmargin=5.6cm,
+  labelwidth=4.9cm,
+  labelsep=0.35cm,
+  itemsep=0.55\baselineskip
+]
+  \item[AES] Sigla de \textit{Advanced Encryption Standard}, algoritmo simétrico padronizado usado para cifragem de dados em repouso e em trânsito.
+  \item[AES-GCM] Modo de operação \textit{Galois/Counter Mode} do AES, que combina cifragem e autenticação em uma única construção (cifra autenticada).
+  \item[Assinatura digital] Evidência criptográfica produzida com chave privada e verificável com a chave pública correspondente, fornecendo autenticidade e não repúdio.
+  \item[AuthTag] Etiqueta de autenticação produzida pelo modo GCM, usada para verificar integridade e autenticidade do texto cifrado e dos dados associados.
+  \item[Autenticidade] Propriedade que fornece evidências de quem gerou ou aprovou uma mensagem ou operação.
+  \item[Chave privada] Chave secreta de um par assimétrico, usada para assinar ou decifrar conforme o protocolo adotado.
+  \item[Chave pública] Chave distribuível de um par assimétrico, usada para verificação de assinaturas ou cifragem em cenários específicos.
+  \item[Cifra autenticada] Construção criptográfica que oferece confidencialidade e verificação de integridade/autenticidade em uma única operação, como AES-GCM.
+  \item[Colisão] Situação em que duas entradas distintas produzem o mesmo hash, comprometendo a resistência da função hash.
+  \item[Confidencialidade] Propriedade que restringe a leitura do conteúdo apenas a entidades autorizadas.
+  \item[Contador monotônico] Valor que apenas cresce ao longo do tempo de uso de um protocolo, útil para evitar reutilização de estados antigos e mitigar replay.
+  \item[Criptografia assimétrica] Modelo criptográfico baseado em pares de chaves pública e privada, em que operações diferentes usam chaves diferentes.
+  \item[Criptografia simétrica] Modelo criptográfico em que a mesma chave, ou chaves diretamente relacionadas, é usada para cifrar e decifrar.
+  \item[Curva elíptica] Estrutura algébrica usada em criptografia assimétrica, oferecendo boa segurança com chaves menores que alternativas clássicas como RSA.
+  \item[Derivação de chaves] Processo de gerar chaves específicas a partir de uma chave-mestra ou material inicial, usado para compartimentar responsabilidades e limitar impacto de comprometimento.
+  \item[Digest] Resultado de tamanho fixo produzido por uma função hash a partir de uma entrada de tamanho arbitrário; também chamado de resumo.
+  \item[ECDSA] Sigla de \textit{Elliptic Curve Digital Signature Algorithm}, algoritmo de assinatura digital baseado em curvas elípticas.
+  \item[FIPS] Sigla de \textit{Federal Information Processing Standards}, conjunto de padrões publicados pelo NIST para uso em sistemas de informação governamentais e comerciais.
+  \item[Função hash criptográfica] Função unidirecional que transforma dados de tamanho arbitrário em um resumo de tamanho fixo, com propriedades de resistência a pré-imagem e colisão.
+  \item[GCM] Sigla de \textit{Galois/Counter Mode}, modo de operação de cifra de bloco que provê cifragem e autenticação simultâneas.
+  \item[GMAC] Sigla de \textit{Galois Message Authentication Code}, variante do GCM usada apenas para autenticação, sem cifragem.
+  \item[HMAC] Sigla de \textit{Hash-based Message Authentication Code}, construção que combina uma função hash com uma chave secreta para verificar integridade e autenticidade de mensagens.
+  \item[Integridade] Propriedade que permite detectar alteração não autorizada em dados ou mensagens.
+  \item[IV] Sigla de \textit{Initialization Vector}, valor usado para inicializar uma cifra e garantir que a mesma mensagem cifrada com a mesma chave produza resultados distintos.
+  \item[MAC] Sigla de código de autenticação de mensagem, valor criptográfico calculado sobre dados com chave secreta para verificar integridade e autenticidade.
+  \item[Não repúdio] Propriedade que dificulta que o autor de uma assinatura válida negue ter produzido determinada evidência.
+  \item[NIST] Sigla de \textit{National Institute of Standards and Technology}, agência dos EUA responsável por padrões de criptografia e segurança da informação.
+  \item[Nonce] Valor usado uma única vez em um protocolo, normalmente para distinguir execuções e mitigar ataques de replay.
+  \item[P-256] Curva elíptica padronizada pelo NIST, também chamada de \textit{prime256v1} ou \textit{secp256r1}, amplamente usada em assinaturas ECDSA e troca de chaves.
+  \item[Pré-imagem] Entrada original de uma função hash; resistência à pré-imagem significa que não é viável encontrar a entrada a partir do digest.
+  \item[Replay] Reutilização indevida de uma mensagem antiga válida para tentar obter vantagem ou acesso não autorizado.
+  \item[RFC] Sigla de \textit{Request for Comments}, série de documentos técnicos usados para padronização de protocolos e tecnologias da internet.
+  \item[SHA-256] Função hash da família \textit{Secure Hash Algorithm} que produz um digest de 256 bits (32 bytes), amplamente usada em integridade, HMAC e assinaturas.
+\end{description}

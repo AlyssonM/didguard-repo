@@ -1,0 +1,44 @@
+\chapter*{Glossário do Capítulo 2}
+\addcontentsline{toc}{chapter}{Glossário do Capítulo 2}
+
+\begin{description}[
+  font=\normalfont\bfseries,
+  style=multiline,
+  leftmargin=5.6cm,
+  labelwidth=4.9cm,
+  labelsep=0.35cm,
+  itemsep=0.55\baselineskip
+]
+  \item[RFID] Sigla de \textit{Radio Frequency Identification}, tecnologia de identificação por radiofrequência usada para detectar e trocar dados com etiquetas, cartões e dispositivos sem contato físico.
+  \item[HF] Sigla de alta frequência, faixa de operação em 13,56 MHz usada por cartões e leitores sem contato da família ISO/IEC 14443.
+  \item[PICC] Sigla de \textit{Proximity Integrated Circuit Card}, termo usado para a tag, cartão ou credencial sem contato energizada pelo campo do leitor.
+  \item[PCD] Sigla de \textit{Proximity Coupling Device}, termo usado para o leitor que energiza a tag e conduz a comunicação sem contato.
+  \item[UID] Sigla de \textit{Unique Identifier}, identificador de fábrica usado para distinguir uma tag no processo de seleção.
+  \item[NUID] Sigla de \textit{Non-Unique Identifier}, identificador não único usado por algumas variantes de cartões de 4 bytes compatíveis com a família MIFARE.
+  \item[Setor] Agrupamento lógico de blocos dentro da memória de uma MIFARE Classic, usado para organizar dados e definir permissões.
+  \item[Bloco] Unidade básica de armazenamento na MIFARE Classic, com 16 bytes por bloco.
+  \item[Bloco de fabricante] Primeiro bloco do setor 0, reservado para dados de fabricação e identificação da tag.
+  \item[Setor trailer] Último bloco de cada setor, reservado para armazenar chaves e bits de acesso.
+  \item[Key A] Chave de autenticação armazenada no setor trailer, usada conforme a política de acesso configurada.
+  \item[Key B] Segunda chave de autenticação possível no setor trailer, também dependente das condições de acesso do setor.
+  \item[Bits de acesso] Conjunto de bits e seus complementos que definem permissões de leitura, escrita e operações especiais em blocos e chaves.
+  \item[Bloco de valor] Formato especial de bloco usado para contadores, créditos e débitos, com redundância interna para detecção de erro.
+  \item[MFRC522] Circuito integrado leitor de RFID da NXP amplamente usado em kits didáticos e módulos de laboratório para ISO/IEC 14443 A.
+  \item[SPI] Sigla de \textit{Serial Peripheral Interface}, barramento serial comum na ligação entre microcontroladores e o leitor MFRC522.
+  \item[SCK] Sigla de \textit{serial clock}, linha de clock do barramento SPI.
+  \item[MOSI] Sigla de \textit{master out, slave in}, linha do barramento SPI usada para dados do controlador para o periférico.
+  \item[MISO] Sigla de \textit{master in, slave out}, linha do barramento SPI usada para dados do periférico para o controlador.
+  \item[SDA] Rótulo usado em muitos módulos RC522 para a linha física de seleção do periférico, embora não represente o papel tradicional de dados seriais em barramentos I2C.
+  \item[NSS] Sigla de \textit{slave select}, sinal de seleção do periférico no barramento SPI.
+  \item[RST] Abreviação de \textit{reset}, sinal usado para reinicialização do leitor.
+  \item[FIFO] Sigla de \textit{First In, First Out}, fila interna usada pelo MFRC522 para transmitir e receber bytes.
+  \item[CRC] Sigla de \textit{Cyclic Redundancy Check}, mecanismo de verificação de integridade usado nos quadros de comunicação.
+  \item[IRQ] Sigla de \textit{Interrupt Request}, sinalização de eventos internos do leitor para o microcontrolador hospedeiro.
+  \item[MAC] Sigla de código de autenticação de mensagem, valor criptográfico usado para verificar integridade e autenticidade de dados.
+  \item[HMAC] Sigla de \textit{Hash-based Message Authentication Code}, forma de MAC construída a partir de função hash e chave secreta compartilhada.
+  \item[CRYPTO1] Cifra proprietária usada pela MIFARE Classic para autenticação e proteção das transações no nível do cartão.
+  \item[AES] Sigla de \textit{Advanced Encryption Standard}, família de algoritmos simétricos moderna adotada por cartões mais recentes e por muitas camadas de aplicação.
+  \item[Anticolisão] Procedimento que permite ao leitor identificar e selecionar uma tag específica quando várias estão no mesmo campo.
+  \item[Autenticação mútua] Processo em que leitor e tag validam um ao outro antes de liberar acesso a blocos protegidos.
+  \item[EEPROM] Sigla de \textit{Electrically Erasable Programmable Read-Only Memory}, tipo de memória não volátil usada para guardar o conteúdo interno da tag.
+\end{description}

@@ -1,0 +1,323 @@
+\chapter{Blockchain e Contratos Inteligentes}
+\label{chap:blockchain-contratos}
+
+\section{Objetivos de aprendizagem}
+Ao final deste capítulo, o aluno deve ser capaz de:
+\begin{itemize}[leftmargin=*]
+  \item explicar o que caracteriza uma blockchain e por que ela difere de um banco de dados convencional;
+  \item distinguir bloco, transação, estado, nó, consenso e contrato inteligente;
+  \item compreender o papel da \textit{Ethereum Virtual Machine} (EVM), do custo computacional e do armazenamento on-chain;
+  \item interpretar o papel de eventos, funções de leitura e funções de escrita em contratos;
+  \item justificar quando vale a pena usar blockchain em uma arquitetura de identidade e controle de acesso.
+\end{itemize}
+\section{Do livro-razão distribuído ao contrato inteligente}
+Uma blockchain pode ser entendida como um livro-razão distribuído no qual múltiplos nós mantêm uma visão compartilhada e verificável de transações e estado. Em vez de confiar em uma única autoridade central para armazenar e validar registros, a rede aplica regras de consenso e validação criptográfica sobre cada alteração \citep{nakamoto_bitcoin,ethereum_whitepaper}.
+
+Embora o tema tenha ganhado popularidade com criptomoedas, o conceito relevante para este curso é mais amplo: blockchain é uma infraestrutura de registro verificável, com forte rastreabilidade e regras de atualização definidas por protocolo.
+
+\section{Elementos básicos de uma blockchain}
+Os componentes conceituais mais importantes são:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{bloco}: agrupamento ordenado de transações e metadados;
+  \item \textbf{transação}: operação solicitada por um participante da rede;
+  \item \textbf{nó}: instância de software que valida, propaga ou armazena o estado da rede;
+  \item \textbf{estado}: fotografia lógica atual dos dados relevantes para execução do protocolo;
+  \item \textbf{consenso}: mecanismo pelo qual a rede concorda sobre a ordem e validade das alterações;
+  \item \textbf{hash do bloco}: referência criptográfica que vincula blocos sucessivos.
+\end{itemize}
+
+Esse encadeamento por hash dificulta alteração retroativa invisível, porque uma mudança em um bloco compromete os vínculos criptográficos dos blocos seguintes.
+
+\section{Por que blockchain não é apenas banco de dados}
+Um banco de dados convencional costuma oferecer:
+\begin{itemize}[leftmargin=*]
+  \item alta flexibilidade de consulta;
+  \item controle administrativo centralizado;
+  \item atualização direta por operadores autorizados.
+\end{itemize}
+
+Uma blockchain, por sua vez, prioriza:
+\begin{itemize}[leftmargin=*]
+  \item verificabilidade compartilhada;
+  \item histórico rastreável de transações;
+  \item execução de regras padronizadas em ambiente distribuído;
+  \item resistência a adulteração não consensual.
+\end{itemize}
+
+Essa diferença é essencial. Blockchain não substitui qualquer banco de dados; ela faz sentido quando auditoria, confiança distribuída, política verificável e integridade histórica são requisitos relevantes.
+
+\section{Transações, contas e estado}
+Em plataformas como Ethereum, a rede opera sobre um modelo de estado global. Cada bloco confirma transações que alteram esse estado. Em termos didáticos, uma transação pode:
+\begin{itemize}[leftmargin=*]
+  \item transferir valor;
+  \item criar um contrato;
+  \item invocar uma função de contrato;
+  \item registrar um evento como efeito observável da execução.
+\end{itemize}
+
+As contas geralmente se dividem em:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{contas externas}: controladas por chaves privadas de usuários ou serviços;
+  \item \textbf{contas de contrato}: controladas pelo código do contrato implantado na rede.
+\end{itemize}
+
+\section{Consenso em alto nível}
+O consenso é o mecanismo que permite à rede decidir qual é a próxima versão válida do livro-razão distribuído. O aluno não precisa dominar, neste momento, cada detalhe de implementação de prova de trabalho ou prova de participação. O ponto essencial é entender que:
+\begin{itemize}[leftmargin=*]
+  \item diferentes redes usam diferentes mecanismos de consenso;
+  \item o consenso afeta desempenho, custo, segurança e finalização;
+  \item a aplicação deve respeitar o tempo de confirmação e o modelo de confiança da rede usada.
+\end{itemize}
+
+Em ambientes didáticos, também é comum usar redes locais de desenvolvimento, nas quais a semântica do contrato é preservada, mas o consenso é simplificado para facilitar testes.
+
+\section{Ethereum e a Ethereum Virtual Machine}
+Ethereum se tornou uma das plataformas mais importantes para contratos inteligentes ao introduzir um ambiente geral de execução programável. Seu modelo permite armazenar estado e executar lógica determinística em todos os nós validadores relevantes da rede \citep{ethereum_whitepaper,wood_ethereum}.
+
+A \textit{Ethereum Virtual Machine} (EVM) é a máquina abstrata que executa o bytecode dos contratos. Conceitualmente, ela:
+\begin{itemize}[leftmargin=*]
+  \item recebe instruções do contrato compilado;
+  \item processa operações aritméticas, lógicas e de armazenamento;
+  \item mantém um contexto de execução padronizado;
+  \item garante que a execução seja determinística para todos os participantes.
+\end{itemize}
+
+Esse determinismo é crítico. Se dois nós executarem a mesma transação sobre o mesmo estado e chegarem a resultados diferentes, a rede perde consistência.
+
+\section{Gas e custo computacional}
+Em Ethereum e plataformas similares, a execução não é tratada como custo zero. Cada operação consome \textit{gas}, uma unidade abstrata associada ao esforço computacional e ao uso de recursos da rede \citep{wood_ethereum,evm_codes}.
+
+\subsection{Por que gas existe}
+O mecanismo de gas existe para:
+\begin{itemize}[leftmargin=*]
+  \item limitar execução infinita ou abusiva;
+  \item cobrar pelo uso de armazenamento e computação compartilhada;
+  \item incentivar contratos mais eficientes.
+\end{itemize}
+
+\subsection{Impacto no desenho de contratos}
+Isso leva a consequências práticas:
+\begin{itemize}[leftmargin=*]
+  \item escrever em armazenamento custa mais do que ler;
+  \item laços longos e estruturas desnecessárias aumentam custo;
+  \item nem tudo deve ser colocado on-chain;
+  \item cálculos pesados e grandes volumes de dados tendem a ser melhores fora da blockchain.
+\end{itemize}
+
+\section{Contratos inteligentes}
+Um contrato inteligente é um programa armazenado na blockchain e executado segundo regras determinísticas da plataforma. Apesar do nome, ele não é ``inteligente'' no sentido humano; trata-se de código com regras explícitas.
+
+Em uma aplicação didática de controle de acesso, um contrato pode ser responsável por:
+\begin{itemize}[leftmargin=*]
+  \item registrar o vínculo entre uma identidade e um identificador de referência;
+  \item armazenar permissões ou janelas temporais de acesso;
+  \item validar se um dispositivo está autorizado a consultar determinado estado;
+  \item emitir eventos que possam ser auditados por outros componentes.
+\end{itemize}
+
+\section{Leitura, escrita e eventos}
+Ao estudar contratos, vale separar três categorias:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{funções de leitura}: consultam estado sem alterá-lo;
+  \item \textbf{funções de escrita}: alteram estado e exigem transação;
+  \item \textbf{eventos}: registros emitidos pelo contrato para facilitar observação externa.
+\end{itemize}
+
+\subsection{Funções de leitura}
+São úteis para:
+\begin{itemize}[leftmargin=*]
+  \item consultar permissões atuais;
+  \item recuperar apontadores ou identificadores vinculados;
+  \item depurar o comportamento esperado do contrato.
+\end{itemize}
+
+\subsection{Funções de escrita}
+São usadas quando a aplicação precisa:
+\begin{itemize}[leftmargin=*]
+  \item registrar novo estado;
+  \item revogar ou conceder acesso;
+  \item atualizar vínculos e políticas.
+\end{itemize}
+
+Como escrevem estado, essas funções têm custo, geram transações e exigem confirmação.
+
+\subsection{Eventos}
+Eventos não substituem armazenamento. Eles servem principalmente para:
+\begin{itemize}[leftmargin=*]
+  \item notificar sistemas externos;
+  \item facilitar indexação e monitoramento;
+  \item apoiar trilhas de auditoria.
+\end{itemize}
+
+Uma aplicação cliente ou um relayer pode escutar eventos e reagir a eles, mas a lógica principal de autorização não deve depender apenas de suposições implícitas sobre histórico de eventos se o estado atual pode ser consultado diretamente.
+
+\section{Estruturas típicas em contratos}
+Ao modelar contratos, é comum encontrar:
+\begin{itemize}[leftmargin=*]
+  \item variáveis de estado;
+  \item \textit{mappings} entre identificadores e registros;
+  \item estruturas compostas para armazenar atributos de autorização;
+  \item verificações de permissões por remetente, papel ou contexto;
+  \item eventos emitidos após mudanças relevantes.
+\end{itemize}
+
+Em termos de projeto, uma boa modelagem tenta equilibrar:
+\begin{itemize}[leftmargin=*]
+  \item simplicidade de verificação;
+  \item custo on-chain;
+  \item clareza de auditoria;
+  \item separação entre dados mínimos on-chain e dados ricos off-chain.
+\end{itemize}
+
+\section{Armazenamento on-chain versus off-chain}
+Nem todo dado deve ficar na blockchain. Há pelo menos três razões para isso:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{custo}: armazenar muitos dados on-chain é caro;
+  \item \textbf{privacidade}: alguns dados não devem ser públicos;
+  \item \textbf{imutabilidade}: uma vez publicado, o dado on-chain é difícil de remover.
+\end{itemize}
+
+Por isso, arquiteturas modernas frequentemente colocam on-chain apenas:
+\begin{itemize}[leftmargin=*]
+  \item identificadores;
+  \item hashes;
+  \item apontadores;
+  \item estados mínimos de autorização;
+  \item evidências necessárias para verificação.
+\end{itemize}
+
+Os dados mais extensos ou sensíveis costumam ficar fora da blockchain, em serviços auxiliares ou armazenamentos distribuídos. Esse será o gancho do próximo capítulo sobre \textit{InterPlanetary File System} (IPFS).
+
+\section{Por que blockchain faz sentido em controle de acesso}
+Em um sistema didático de identidade e autorização, blockchain pode ser útil quando o objetivo é:
+\begin{itemize}[leftmargin=*]
+  \item registrar regras de acesso com trilha auditável;
+  \item permitir verificação independente do estado autorizado;
+  \item separar a política verificável da interface de administração;
+  \item reduzir dependência de um único banco central opaco para decisão crítica.
+\end{itemize}
+
+Ela não elimina a necessidade de outros componentes. Firmware, relayer, frontend, armazenamento off-chain e gestão de chaves continuam sendo partes essenciais da arquitetura.
+
+\section{Limitações e trade-offs}
+Uma decisão madura sobre blockchain precisa reconhecer seus custos:
+\begin{itemize}[leftmargin=*]
+  \item latência maior do que sistemas puramente locais;
+  \item custo financeiro ou computacional por transação;
+  \item dificuldade de corrigir rapidamente dados mal modelados;
+  \item exposição pública de parte do estado, conforme a rede usada;
+  \item necessidade de desenhar com cuidado o que fica on-chain e o que fica fora.
+\end{itemize}
+
+Em outras palavras, blockchain não deve ser usada por moda. Ela deve ser escolhida quando os benefícios de verificabilidade, rastreabilidade e execução compartilhada superam seus custos operacionais.
+
+\section{Relação com uma arquitetura como a do DIDGuard}
+Em uma arquitetura inspirada no DIDGuard, o contrato inteligente tende a assumir o papel de camada verificável de política e vínculo mínimo. Isso significa que ele pode:
+\begin{itemize}[leftmargin=*]
+  \item associar um identificador descentralizado a um apontador externo;
+  \item manter autorização por dispositivo, identidade ou janela temporal;
+  \item fornecer funções de consulta de estado atual;
+  \item emitir eventos úteis para observação do sistema.
+\end{itemize}
+
+Enquanto isso:
+\begin{itemize}[leftmargin=*]
+  \item o firmware lida com a credencial física e a coleta local;
+  \item o relayer integra chamadas ao contrato e serviços auxiliares;
+  \item o armazenamento distribuído hospeda dados mais ricos;
+  \item o frontend fornece operação e visualização.
+\end{itemize}
+
+Essa divisão de responsabilidades é importante porque evita transformar o contrato em um repositório de tudo. O contrato deve guardar o que precisa ser público, verificável e mínimo.
+
+\section{Leituras recomendadas}
+\begin{itemize}[leftmargin=*]
+  \item white paper do Bitcoin, para entender a noção original de livro-razão distribuído e encadeamento por hash \citep{nakamoto_bitcoin};
+  \item white paper do Ethereum, para motivação da plataforma programável \citep{ethereum_whitepaper};
+  \item \textit{Ethereum Yellow Paper}, para visão mais formal da execução e do custo computacional \citep{wood_ethereum};
+  \item documentação oficial de Solidity, para modelagem de contratos, tipos, eventos e boas práticas \citep{solidity_docs};
+  \item documentação de opcodes da EVM, para aprofundamento no modelo de execução \citep{evm_codes}.
+\end{itemize}
+
+\section{Rodando na prática}
+O objetivo desta prática é implantar um contrato simples em uma blockchain local, gravar um estado de autorização e observar a diferença entre leitura, escrita e evento emitido.
+
+\subsection{Pré-requisitos}
+\begin{itemize}[leftmargin=*]
+  \item Node.js 18 ou superior;
+  \item terminal com suporte a \texttt{npm} e \texttt{npx};
+  \item diretório \texttt{docs/book/examples/cap4-blockchain-contratos} disponível localmente.
+\end{itemize}
+
+\subsection{Arquivos do laboratório}
+O mini projeto deste capítulo contém:
+\begin{verbatim}
+contracts/AccessRegistry.sol
+scripts/deploy.js
+scripts/demo.js
+hardhat.config.js
+package.json
+\end{verbatim}
+
+\subsection{Instalação}
+No diretório do laboratório:
+\begin{verbatim}
+npm install
+\end{verbatim}
+
+\subsection{Execução}
+Em um terminal:
+\begin{verbatim}
+npx hardhat node
+\end{verbatim}
+
+Em outro terminal:
+\begin{verbatim}
+npx hardhat run scripts/deploy.js --network localhost
+\end{verbatim}
+
+Copie o endereço do contrato implantado e execute:
+\begin{verbatim}
+$env:ACCESS_REGISTRY_ADDRESS="COLE_O_ENDERECO_AQUI"
+npx hardhat run scripts/demo.js --network localhost
+\end{verbatim}
+
+Alternativamente, para executar deploy e demonstração em um único passo (sem copiar endereços):
+\begin{verbatim}
+npx hardhat run scripts/demo-auto.js --network localhost
+\end{verbatim}
+
+\subsection{O que observar}
+\begin{itemize}[leftmargin=*]
+  \item o contrato sendo implantado na rede local;
+  \item a chamada de escrita \texttt{setAccess} gerando uma transação;
+  \item a chamada de leitura \texttt{getAccess} retornando o estado sem criar nova transação;
+  \item o evento \texttt{AccessUpdated} sendo recuperado do recibo.
+\end{itemize}
+
+\subsection{Perguntas de análise}
+\begin{itemize}[leftmargin=*]
+  \item Por que a leitura pode ser modelada como \texttt{view}?
+  \item Por que a escrita precisa de uma transação assinada e minerada?
+  \item Qual informação foi mantida on-chain e qual informação ficou fora do contrato?
+\end{itemize}
+
+\subsection{Extensão sugerida}
+Evolua o contrato para:
+\begin{itemize}[leftmargin=*]
+  \item registrar o identificador de um dispositivo;
+  \item armazenar um tempo de expiração;
+  \item impedir atualizações com prazo já expirado.
+\end{itemize}
+
+\subsection{Localização do exemplo}
+Todos os arquivos usados nesta prática estão em:
+\begin{verbatim}
+docs/book/examples/cap4-blockchain-contratos
+\end{verbatim}
+
+\vspace{1em}
+\noindent\rule{\textwidth}{0.4pt}
+\vspace{0.5em}
+\noindent\textbf{Encerramento e próximos passos.}
+Com este capítulo, a apostila cobriu as quatro camadas fundamentais do DIDGuard: identidade descentralizada (DIDs), credencial física (RFID/MIFARE), primitivas criptográficas e registro verificável de permissões (blockchain). Os capítulos seguintes --- quando disponíveis --- abordarão armazenamento distribuído com IPFS, firmware do ESP32, integração via relayer e frontend de operação, completando o percurso da teoria à implementação.
