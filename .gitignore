@@ -74,3 +74,9 @@ backup/
 *.fls
 *.log
 *.synctex.gz
+
+# PlatformIO / ESP-IDF build artifacts
+.pio/
+managed_components/
+sdkconfig
+sdkconfig.old
