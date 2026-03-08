@@ -1,0 +1,390 @@
+\chapter{ESP32, ESP-IDF e PlatformIO}
+\label{chap:firmware-esp32}
+
+\section{Objetivos de aprendizagem}
+Ao final deste capítulo, o aluno deve ser capaz de:
+\begin{itemize}[leftmargin=*]
+  \item explicar o papel do ESP32 como plataforma de borda em um sistema de identidade e controle de acesso;
+  \item distinguir hardware, framework oficial ESP-IDF e camada de automação fornecida pelo PlatformIO;
+  \item compreender a estrutura básica de um projeto ESP-IDF em PlatformIO;
+  \item configurar conectividade Wi-Fi em modo estação;
+  \item inicializar o barramento SPI e conectar um leitor MFRC522;
+  \item descrever como primitivas criptográficas locais podem apoiar a geração de um \textit{DID Document}.
+\end{itemize}
+
+\section{Por que o firmware merece um capítulo próprio}
+Em uma arquitetura como a do DIDGuard, o firmware é a camada que toca o mundo físico. É nele que a aplicação:
+\begin{itemize}[leftmargin=*]
+  \item lê uma credencial em uma tag;
+  \item estabelece conectividade de rede;
+  \item protege material criptográfico;
+  \item produz evidências locais que serão consumidas por serviços externos.
+\end{itemize}
+
+Essa posição faz do firmware uma peça central. Um erro nessa camada pode comprometer disponibilidade, segurança e confiabilidade de todo o sistema.
+
+\section{Visão geral do ESP32}
+ESP32 é uma família de sistemas em chip (\textit{System on Chip}, SoC) voltada para aplicações embarcadas conectadas. A plataforma combina processamento, memória, periféricos e interfaces de comunicação em um único chip \citep{espressif_esp32_overview}.
+
+Do ponto de vista de projeto, o ESP32 é atraente porque reúne:
+\begin{itemize}[leftmargin=*]
+  \item conectividade Wi-Fi integrada;
+  \item suporte a múltiplos periféricos seriais, incluindo SPI, I\textsuperscript{2}C e UART;
+  \item recursos suficientes para lógica local, buffers, serialização e operações criptográficas;
+  \item ecossistema maduro de ferramentas e documentação.
+\end{itemize}
+
+Em termos didáticos, ele permite que o aluno trabalhe simultaneamente com rede, periféricos, concorrência e segurança em um único ambiente de desenvolvimento.
+
+\section{ESP-IDF: o framework oficial}
+ESP-IDF (\textit{Espressif IoT Development Framework}) é o framework oficial de desenvolvimento para a família ESP32 \citep{espidf_programming_guide}. Ele organiza a aplicação em componentes e fornece:
+\begin{itemize}[leftmargin=*]
+  \item APIs para Wi-Fi, rede, armazenamento, tarefas e sincronização;
+  \item drivers de periféricos como SPI, GPIO e timers;
+  \item integração com Mbed TLS para operações criptográficas;
+  \item sistema de build baseado em CMake;
+  \item configuração detalhada por Kconfig e \texttt{sdkconfig}.
+\end{itemize}
+
+O ESP-IDF não é apenas uma biblioteca. Ele define convenções de organização, inicialização e dependências entre componentes, o que impacta diretamente a forma como o firmware é projetado.
+
+\section{PlatformIO como camada de produtividade}
+PlatformIO não substitui o ESP-IDF. Ele automatiza tarefas comuns do fluxo de desenvolvimento, como instalação de toolchain, resolução de dependências, build, upload e monitoramento serial \citep{platformio_espidf,platformio_espressif32}.
+
+Na prática, o aluno passa a trabalhar com dois níveis:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{ESP-IDF}: API, componentes e semântica do firmware;
+  \item \textbf{PlatformIO}: organização do projeto, ambientes de build e automação de ferramentas.
+\end{itemize}
+
+Essa distinção é importante. Quando algo falha, o aluno precisa saber se o problema está na lógica do firmware, na configuração do framework ou no ambiente de build.
+
+\section{Estrutura típica de projeto}
+Um projeto ESP-IDF via PlatformIO tende a conter, no mínimo:
+\begin{verbatim}
+platformio.ini
+sdkconfig.defaults
+CMakeLists.txt
+include/
+src/
+\end{verbatim}
+
+O papel desses artefatos pode ser resumido assim:
+\begin{itemize}[leftmargin=*]
+  \item \texttt{platformio.ini}: define placa, framework, monitor serial e opções de build;
+  \item \texttt{sdkconfig.defaults}: registra configurações iniciais do menuconfig;
+  \item \texttt{CMakeLists.txt}: conecta o projeto ao sistema de build do ESP-IDF;
+  \item \texttt{include/}: cabeçalhos públicos da aplicação;
+  \item \texttt{src/}: código-fonte principal e arquivos auxiliares.
+\end{itemize}
+
+\section{Configuração via \texttt{platformio.ini}}
+Um exemplo mínimo de configuração pode ser:
+\begin{verbatim}
+[env:esp32dev]
+platform = espressif32
+board = esp32dev
+framework = espidf
+monitor_speed = 115200
+build_flags =
+  -D WIFI_SSID=\"LAB_WIFI\"
+  -D WIFI_PASS=\"LAB_PASS\"
+\end{verbatim}
+
+Esse arquivo concentra decisões operacionais importantes:
+\begin{itemize}[leftmargin=*]
+  \item qual placa será alvo do build;
+  \item qual framework será usado;
+  \item quais macros de compilação a aplicação receberá;
+  \item como o monitor serial será aberto.
+\end{itemize}
+
+\section{Configuração persistente via \texttt{sdkconfig.defaults}}
+O arquivo \texttt{sdkconfig.defaults} permite registrar preferências que devem existir desde o primeiro build. Um exemplo didático:
+\begin{verbatim}
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+CONFIG_ESP_WIFI_ENABLED=y
+CONFIG_MBEDTLS_PSA_CRYPTO_CLIENT=y
+\end{verbatim}
+
+Nem toda configuração precisa estar nesse arquivo, mas ele é útil para manter reprodutibilidade entre máquinas e evitar que parâmetros críticos dependam exclusivamente do estado local do menuconfig.
+
+\section{Inicialização básica do sistema}
+Antes de usar Wi-Fi ou periféricos, o firmware costuma inicializar:
+\begin{itemize}[leftmargin=*]
+  \item NVS (\textit{Non-Volatile Storage});
+  \item interface de rede (\texttt{esp\_netif});
+  \item laço de eventos do sistema;
+  \item drivers ou componentes necessários ao fluxo da aplicação.
+\end{itemize}
+
+No caso do Wi-Fi, a própria documentação do ESP-IDF deixa claro que a pilha depende dessa ordem de inicialização \citep{espidf_wifi,espidf_nvs}.
+
+\section{Exemplo: conexão Wi-Fi em modo estação}
+O modo estação (\textit{Station Mode}, STA) é o cenário em que o ESP32 se conecta a um ponto de acesso existente. Em aplicações como o DIDGuard, isso é suficiente para:
+\begin{itemize}[leftmargin=*]
+  \item consultar um relayer;
+  \item enviar leituras de tags;
+  \item requisitar atualização de permissões;
+  \item obter materiais auxiliares, como um documento ou um desafio criptográfico.
+\end{itemize}
+
+Um trecho típico de inicialização em ESP-IDF é:
+\begin{verbatim}
+ESP_ERROR_CHECK(nvs_flash_init());
+ESP_ERROR_CHECK(esp_netif_init());
+ESP_ERROR_CHECK(esp_event_loop_create_default());
+esp_netif_create_default_wifi_sta();
+
+wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+\end{verbatim}
+
+Depois disso, a aplicação define credenciais e inicia a conexão:
+\begin{verbatim}
+wifi_config_t wifi_config = {
+  .sta = {
+    .ssid = WIFI_SSID,
+    .password = WIFI_PASS,
+    .threshold.authmode = WIFI_AUTH_WPA2_PSK
+  }
+};
+
+ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
+ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+ESP_ERROR_CHECK(esp_wifi_start());
+ESP_ERROR_CHECK(esp_wifi_connect());
+\end{verbatim}
+
+Do ponto de vista didático, esse exemplo reforça três ideias:
+\begin{itemize}[leftmargin=*]
+  \item a aplicação depende de inicialização ordenada de subsistemas;
+  \item Wi-Fi é orientado a eventos, e não apenas a chamadas sequenciais;
+  \item a conectividade deve ser tratada como parte da lógica de aplicação, inclusive com reconexão e timeout.
+\end{itemize}
+
+\section{Integração com o RC522 via SPI}
+O MFRC522 se comunica com o microcontrolador por SPI. No lado do ESP32, isso significa:
+\begin{itemize}[leftmargin=*]
+  \item configurar os pinos do barramento;
+  \item inicializar o \textit{host} SPI;
+  \item criar um driver de transporte para o leitor;
+  \item delegar a lógica de polling, seleção e estados da PICC a uma biblioteca especializada \citep{nxp_mfrc522,espidf_spi_master}.
+\end{itemize}
+
+No contexto deste material, a forma preferida de integração não é manipular registradores do MFRC522 diretamente. O exemplo do capítulo usa a biblioteca \texttt{abobija/rc522} como componente gerenciado do ESP-IDF, declarada em \texttt{idf\_component.yml} \citep{abobija_rc522}. Essa biblioteca encapsula:
+\begin{itemize}[leftmargin=*]
+  \item criação do transporte SPI;
+  \item instalação do driver do leitor;
+  \item polling periódico de tags;
+  \item transições de estado da PICC;
+  \item APIs de nível mais alto para leitura, autenticação e escrita.
+\end{itemize}
+
+Um exemplo de configuração do driver SPI da biblioteca é:
+\begin{verbatim}
+rc522_spi_config_t driver_config = {
+  .host_id = SPI3_HOST,
+  .bus_config = &(spi_bus_config_t){
+    .miso_io_num = 25,
+    .mosi_io_num = 23,
+    .sclk_io_num = 19,
+    .max_transfer_sz = 32
+  },
+  .dev_config = {
+    .clock_speed_hz = 1000000,
+    .spics_io_num = 22,
+  },
+  .rst_io_num = -1
+};
+\end{verbatim}
+
+Depois disso, o scanner é criado e iniciado no nível de componente:
+\begin{verbatim}
+rc522_spi_create(&driver_config, &driver);
+rc522_driver_install(driver);
+
+rc522_config_t scanner_config = {
+  .driver = driver,
+  .poll_interval_ms = 250
+};
+
+rc522_create(&scanner_config, &scanner);
+rc522_register_events(scanner,
+                      RC522_EVENT_PICC_STATE_CHANGED,
+                      on_picc_state_changed,
+                      NULL);
+rc522_start(scanner);
+\end{verbatim}
+
+\subsection{Por que usar a biblioteca como componente}
+Essa abordagem é preferível em um firmware real porque separa responsabilidades:
+\begin{itemize}[leftmargin=*]
+  \item o componente \texttt{abobija/rc522} cuida do protocolo do leitor e do ciclo de vida das tags;
+  \item a aplicação foca no que fazer quando uma tag aparece, é autenticada ou precisa ser lida;
+  \item a lógica de domínio, como geração de DID, MAC, contador e assinatura, fica desacoplada do detalhe elétrico do MFRC522.
+\end{itemize}
+
+\subsection{Acesso direto versus componente}
+Vale separar claramente dois estilos de integração:
+\begin{itemize}[leftmargin=*]
+  \item \textbf{acesso direto a registradores}: útil para estudo de baixo nível, depuração de SPI e entendimento da interface do chip;
+  \item \textbf{uso de componente}: mais adequado para aplicações reais, porque reduz código repetitivo, melhora manutenção e reaproveita uma API já testada.
+\end{itemize}
+
+Para um capítulo didático introdutório, é válido conhecer o registrador e o barramento. Para um projeto funcional, a barra técnica correta é subir um nível e trabalhar com o componente.
+
+\section{Criptografia local no ESP32}
+O ESP-IDF integra Mbed TLS, o que permite realizar operações criptográficas no próprio dispositivo \citep{espidf_mbedtls}. Em um projeto como o DIDGuard, isso é relevante para:
+\begin{itemize}[leftmargin=*]
+  \item gerar ou carregar chaves assimétricas;
+  \item calcular hashes;
+  \item assinar desafios;
+  \item derivar identificadores e evidências locais.
+\end{itemize}
+
+\subsection{Geração de chave elíptica}
+Uma forma didática de gerar uma chave é:
+\begin{verbatim}
+mbedtls_pk_init(&pk);
+mbedtls_pk_setup(&pk, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY));
+mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1,
+                    mbedtls_pk_ec(pk),
+                    mbedtls_ctr_drbg_random,
+                    &ctr_drbg);
+\end{verbatim}
+
+Esse fluxo cria uma chave baseada na curva P-256, que é suficiente para experimentos de identidade e assinatura digital em ambiente embarcado.
+
+\subsection{Derivação de um identificador}
+Uma estratégia comum é derivar um identificador estável a partir da chave pública ou de um material público do dispositivo. Um exemplo didático:
+\begin{verbatim}
+mbedtls_sha256(pubkey_bytes, pubkey_len, digest, 0);
+\end{verbatim}
+
+O resultado pode ser convertido para hexadecimal e usado como parte do identificador:
+\begin{verbatim}
+did:esp32:4f6a8b...
+\end{verbatim}
+
+Em uma implementação real, a semântica exata do método DID precisa ser definida explicitamente. Aqui, a ideia central é mostrar como o firmware pode contribuir para produzir um identificador verificável.
+
+\section{Montando um DID Document no firmware}
+Depois de gerar a chave e derivar o identificador, a aplicação pode serializar um documento JSON com os campos mínimos necessários para representar a identidade do dispositivo.
+
+Um exemplo didático de estrutura:
+\begin{verbatim}
+{
+  "@context": ["https://www.w3.org/ns/did/v1"],
+  "id": "did:esp32:4f6a8b...",
+  "verificationMethod": [{
+    "id": "did:esp32:4f6a8b...#device-key-1",
+    "type": "EcdsaSecp256r1VerificationKey2019",
+    "controller": "did:esp32:4f6a8b...",
+    "publicKeyHex": "04ABCD..."
+  }]
+}
+\end{verbatim}
+
+Neste exemplo, o campo \texttt{publicKeyHex} é usado por simplicidade didática e aparece nas registries associadas ao ecossistema DID, embora outras representações como JWK ou Multibase também sejam comuns \citep{w3c_did_spec_registries}.
+
+Neste ponto, a intenção do firmware não é resolver todo o ecossistema de identidade. Seu papel é preparar dados confiáveis para que camadas superiores façam persistência, distribuição e verificação.
+
+\section{Fluxo conceitual completo}
+Uma sequência coerente para o firmware pode ser descrita assim:
+\begin{enumerate}[leftmargin=*]
+  \item inicializar NVS, rede e laço de eventos;
+  \item conectar o ESP32 ao Wi-Fi;
+  \item inicializar o barramento SPI e o leitor RC522;
+  \item ler a tag e extrair dados relevantes;
+  \item gerar ou carregar chave criptográfica do dispositivo;
+  \item construir um DID e serializar o \textit{DID Document};
+  \item entregar esse material a uma camada superior por HTTP, serial ou outro canal definido pela arquitetura.
+\end{enumerate}
+
+\section{Boas práticas de projeto}
+Ao elaborar firmware para um caso como este, convém observar:
+\begin{itemize}[leftmargin=*]
+  \item separar drivers, serviços e lógica de aplicação;
+  \item evitar segredos em texto puro no código-fonte;
+  \item centralizar configuração de pinos, credenciais e parâmetros;
+  \item registrar logs úteis para depuração sem vazar informação sensível;
+  \item tratar falhas de rede, autenticação e periféricos como parte normal do fluxo.
+\end{itemize}
+
+\section{Leituras recomendadas}
+\begin{itemize}[leftmargin=*]
+  \item documentação geral do ESP-IDF para visão de componentes, build e APIs \citep{espidf_programming_guide};
+  \item referência de Wi-Fi do ESP-IDF, para modos de operação, eventos e sequência de inicialização \citep{espidf_wifi};
+  \item documentação de NVS, para entender persistência local e dependências da pilha de rede \citep{espidf_nvs};
+  \item documentação do driver SPI Master, para modelagem correta do barramento e de transações \citep{espidf_spi_master};
+  \item documentação do Mbed TLS no ESP-IDF, para geração de chaves e operações criptográficas embarcadas \citep{espidf_mbedtls};
+  \item documentação do PlatformIO para uso do framework \texttt{espidf} e do ecossistema \texttt{espressif32} \citep{platformio_espidf,platformio_espressif32};
+  \item documentação do componente \texttt{abobija/rc522}, para API de eventos, criação do driver e exemplos de uso \citep{abobija_rc522};
+  \item página oficial do ESP32, para posicionamento da plataforma e visão geral de recursos \citep{espressif_esp32_overview}.
+\end{itemize}
+
+\section{Rodando na prática}
+O objetivo desta prática é estudar um mini projeto autocontido que mostra a organização de um firmware em PlatformIO com ESP-IDF, incluindo Wi-Fi, SPI/RC522 e geração de um \textit{DID Document} simplificado.
+
+\subsection{Pré-requisitos}
+\begin{itemize}[leftmargin=*]
+  \item PlatformIO instalado;
+  \item toolchain do ambiente \texttt{espressif32} disponível;
+  \item diretório \texttt{docs/book/examples/cap5-firmware-esp32} disponível localmente.
+\end{itemize}
+
+\subsection{Arquivos do laboratório}
+O mini projeto deste capítulo contém:
+\begin{verbatim}
+platformio.ini
+sdkconfig.defaults
+CMakeLists.txt
+src/CMakeLists.txt
+src/idf_component.yml
+src/main.c
+include/lab_config.h
+\end{verbatim}
+
+\subsection{O que o aluno deve observar}
+\begin{itemize}[leftmargin=*]
+  \item como o \texttt{platformio.ini} descreve o ambiente de build;
+  \item como o \texttt{sdkconfig.defaults} antecipa escolhas de configuração;
+  \item como o \texttt{idf\_component.yml} declara a dependência \texttt{abobija/rc522};
+  \item como a inicialização do Wi-Fi depende de NVS, \texttt{esp\_netif} e laço de eventos;
+  \item como a biblioteca RC522 cria o driver SPI e publica eventos de mudança de estado da tag;
+  \item como a aplicação gera uma chave local, deriva um identificador e serializa um documento JSON.
+\end{itemize}
+
+\subsection{Execução sugerida}
+No diretório do laboratório:
+\begin{verbatim}
+pio run
+pio run -t upload
+pio device monitor
+\end{verbatim}
+
+\subsection{Resultados esperados}
+O aluno deve encontrar no log serial mensagens equivalentes a:
+\begin{itemize}[leftmargin=*]
+  \item inicialização bem-sucedida do Wi-Fi;
+  \item inicialização do driver e do scanner RC522;
+  \item detecção de uma tag pelo evento \texttt{RC522\_EVENT\_PICC\_STATE\_CHANGED};
+  \item impressão do DID gerado e do JSON associado.
+\end{itemize}
+
+\subsection{Extensão sugerida}
+Como exercício, o aluno pode:
+\begin{itemize}[leftmargin=*]
+  \item substituir macros de SSID e senha por leitura de NVS;
+  \item mover a lógica do RC522 para um módulo dedicado;
+  \item enviar o \textit{DID Document} por HTTP para um endpoint local;
+  \item assinar um desafio simples com a chave gerada no firmware.
+\end{itemize}
+
+\subsection{Localização do exemplo}
+Todos os arquivos usados nesta prática estão em:
+\begin{verbatim}
+docs/book/examples/cap5-firmware-esp32
+\end{verbatim}

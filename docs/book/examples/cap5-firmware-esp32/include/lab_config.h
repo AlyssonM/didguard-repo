@@ -1,0 +1,11 @@
+#pragma once
+
+#define RC522_PIN_MOSI 23
+#define RC522_PIN_MISO 25
+#define RC522_PIN_SCLK 19
+#define RC522_PIN_CS   22
+#define RC522_PIN_RST  -1
+
+#define RC522_SPI_CLOCK_HZ 1000000
+#define RC522_POLL_INTERVAL_MS 250
+#define DID_BUFFER_SIZE 1024

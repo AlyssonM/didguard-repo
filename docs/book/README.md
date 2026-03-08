@@ -7,7 +7,7 @@
 - `chapters/ch02-rfid-mifare.tex`: Capitulo 2 sobre RFID e MIFARE Classic
 - `chapters/ch03-criptografia-aplicada.tex`: Capitulo 3 sobre fundamentos de criptografia aplicada
 - `chapters/ch04-blockchain-contratos.tex`: Capitulo 4 sobre blockchain e contratos inteligentes
-- `chapters/glossario.tex`: glossario geral no fim do livro
+- `chapters/ch05-firmware-esp32.tex`: Capitulo 5 sobre ESP32, ESP-IDF e PlatformIO
 - `examples/`: mini projetos autocontidos usados nas secoes "Rodando na pratica"
 - `references.bib`: base bibliografica BibTeX
 
@@ -32,6 +32,5 @@ latexmk -pdf main.tex
 ```
 
 ## Expansao sugerida
-- `chapters/ch05-ipfs-armazenamento.tex`
-- `chapters/ch06-firmware-esp32.tex`
+- `chapters/ch06-ipfs-armazenamento.tex`
 - `chapters/ch07-relayer-frontend.tex`
